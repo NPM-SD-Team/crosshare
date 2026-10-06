@@ -73,6 +73,10 @@ There are also playwright tests that can be run (while the app is running), but 
 # pnpm playwright test
 ```
 
+## Project documentation
+
+For a deeper technical overview of the repository, architecture, Firebase model, and development workflow, see [docs/PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md).
+
 ## Credits
 
 See the [contributors](https://github.com/crosshare-org/crosshare/graphs/contributors) on this repository and [crosshare.org/donate](https://crosshare.org/donate).
