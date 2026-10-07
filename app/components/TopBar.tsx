@@ -1,6 +1,7 @@
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { updateDoc } from 'firebase/firestore';
+import Image from 'next/image';
 import {
   CSSProperties,
   ReactNode,
@@ -225,7 +226,7 @@ interface TopBarLinkAProps extends TopBarLinkProps {
   as?: string;
 }
 
-const TopBarLinkA = (props: TopBarLinkAProps) => {
+export const TopBarLinkA = (props: TopBarLinkAProps) => {
   return (
     <Link
       data-disabled={props.disabled}
@@ -310,8 +311,9 @@ export const TopBar = ({
                 className={styles.notificationsBtn}
                 title="View Notifications"
               >
-                <Logo
-                  notificationCount={filtered.length}
+                <Image
+                  src="/logo.svg"
+                  alt=""
                   width={HEADER_HEIGHT - 4}
                   height={HEADER_HEIGHT - 4}
                 />
@@ -319,8 +321,9 @@ export const TopBar = ({
               </ButtonReset>
             ) : (
               <Link href="/" className={styles.logoLink} title="Crosshare Home">
-                <Logo
-                  notificationCount={0}
+                <Image
+                  src="/logo.svg"
+                  alt=""
                   width={HEADER_HEIGHT - 4}
                   height={HEADER_HEIGHT - 4}
                 />

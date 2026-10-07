@@ -157,6 +157,7 @@ import {
   TopBarDropDownLinkA,
   TopBarDropDownLinkSimpleA,
   TopBarLink,
+  TopBarLinkA,
 } from './TopBar.js';
 
 const ModeratingOverlay = dynamic(
@@ -1036,24 +1037,12 @@ export const Puzzle = ({
         <TopBarDropDown
           contentWidth={240}
           icon={isSlate ? <More /> : <FaEllipsisH />}
-          text={t`More`}
+          text={t`Settings`}
         >
           {(closeDropdown) => (
             <div className={styles.topBarPuzzleMoreDropdown}>
               {!state.success ? (
                 <>
-                  <TopBarDropDownLink
-                    icon={<Rebus />}
-                    text={t`Enter Rebus`}
-                    shortcutHint={<EscapeKey />}
-                    onClick={() => {
-                      const kpa: KeypressAction = {
-                        type: 'KEYPRESS',
-                        key: { k: KeyK.Escape },
-                      };
-                      dispatch(kpa);
-                    }}
-                  />
                   <TopBarDropDownLink
                     icon={<FaPencilAlt />}
                     text={
@@ -1089,13 +1078,13 @@ export const Puzzle = ({
                   }}
                 />
               )}
-              <TopBarDropDownLink
+              {/* <TopBarDropDownLink
                 icon={<FaKeyboard />}
                 text={t`Toggle Keyboard`}
                 onClick={() => {
                   setToggleKeyboard(!toggleKeyboard);
                 }}
-              />
+              /> */}
               {mounted && props.isAdmin ? (
                 <>
                   <TopBarDropDownLink
@@ -1142,11 +1131,6 @@ export const Puzzle = ({
               ) : (
                 ''
               )}
-              <TopBarDropDownLinkSimpleA
-                href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
-                icon={<FaPrint />}
-                text={t`Print Puzzle`}
-              />
               {isSlate ? (
                 ''
               ) : (
@@ -1200,11 +1184,7 @@ export const Puzzle = ({
                   ) : (
                     ''
                   )}
-                  <TopBarDropDownLinkA
-                    href="/account"
-                    icon={<FaUser />}
-                    text={t`Account / Settings`}
-                  />
+                  
                   <TopBarDropDownLinkA
                     href="/construct"
                     icon={<FaHammer />}
@@ -1353,6 +1333,28 @@ export const Puzzle = ({
                       ) : (
                         ''
                       )}
+                      <TopBarLinkA
+                        href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
+                        icon={<FaPrint />}
+                        text={t`Print Puzzle`}
+                      />
+                      <TopBarLink
+                        icon={<Rebus />}
+                        text={t`Enter Rebus`}
+                        onClick={() => {
+                          const kpa: KeypressAction = {
+                            type: 'KEYPRESS',
+                            key: { k: KeyK.Escape },
+                          };
+                          dispatch(kpa);
+                        }}
+                      />
+
+                    <TopBarLinkA
+                      href="/account"
+                      icon={<FaUser />}
+                      text={t`Account`}
+                    />
                       <TopBarLink
                         icon={
                           state.clueView ? (
