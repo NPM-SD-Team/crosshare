@@ -8,9 +8,9 @@ import { AuthContext } from '../components/AuthContext.js';
 import { BrowserWarning } from '../components/BrowserWarning.js';
 import { CrosshareAudioContext } from '../components/CrosshareAudioContext.js';
 import { Snackbar, SnackbarProvider } from '../components/Snackbar.js';
-import '../lib/atoms.css';
+import '../lib/atoms.css?v=1.1';
 import * as gtag from '../lib/gtag.js';
-import '../lib/style.css';
+import '../lib/style.css?v=1.1';
 import {
   ERROR_COLOR,
   LINK,

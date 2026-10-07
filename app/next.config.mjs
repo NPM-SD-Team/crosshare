@@ -8,6 +8,15 @@ const baseConfig = {
   distDir: distDir,
   poweredByHeader: false,
   productionBrowserSourceMaps: true,
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300, 
+      };
+    }
+    return config;
+  },
   i18n: {
     locales: ['en', 'es', 'it', 'fr', 'id', 'pseudo'],
     defaultLocale: 'en',

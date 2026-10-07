@@ -34,8 +34,16 @@ Since it's your first time using pnpm you should get prompted that corepack will
 ```
 # cp firebaseConfig.emulators.ts firebaseConfig.ts
 # pnpm compileI18n
-# pnpm emulate
+# pnpm emulate:backend
 ```
+
+then open a separate terminal(so both systems can be running)
+```
+# cd app
+# pnpm emulate:frontend
+```
+
+This allows you to restart the visual changes without restarting the emulators, quickening css and visual updates.
 
 The last command will bring up the firebase emulators and then start Crosshare. When everything is running you should see `✓ Ready` at the bottom of your terminal. Now the site should be visible at http://localhost:3000 and the emulator admin at http://localhost:4000
 
