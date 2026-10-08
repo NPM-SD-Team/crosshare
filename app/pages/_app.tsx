@@ -8,9 +8,9 @@ import { AuthContext } from '../components/AuthContext.js';
 import { BrowserWarning } from '../components/BrowserWarning.js';
 import { CrosshareAudioContext } from '../components/CrosshareAudioContext.js';
 import { Snackbar, SnackbarProvider } from '../components/Snackbar.js';
-import '../lib/atoms.css?v=1.1';
+import '../lib/atoms.css';
 import * as gtag from '../lib/gtag.js';
-import '../lib/style.css?v=1.1';
+import '../lib/style.css';
 import {
   ERROR_COLOR,
   LINK,
@@ -203,7 +203,7 @@ html, body.light-mode, body.dark-mode .reverse-theme {
 .reverse-theme, body.dark-mode, body.light-mode .reverse-theme {
   ${darkTheme}
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   html {
     ${darkTheme}
   }

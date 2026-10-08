@@ -27,6 +27,10 @@ export const DistanceToNow = (props: {
   }
 
   const dateFnsLocale = locale ? localeMap[locale] : undefined;
+  const tooltipDate = props.date.toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
 
   if (props.isPast && props.date > new Date()) {
     return (
@@ -42,7 +46,7 @@ export const DistanceToNow = (props: {
         addSuffix: true,
         locale: dateFnsLocale,
       })}
-      tooltip={props.date.toISOString()}
+      tooltip={tooltipDate}
     />
   );
 };

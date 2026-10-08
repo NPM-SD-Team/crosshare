@@ -311,8 +311,8 @@ export const TopBar = ({
                 className={styles.notificationsBtn}
                 title="View Notifications"
               >
-                <Image
-                  src="/logo.svg"
+                <img
+                  src="/Logo.png"
                   alt=""
                   width={HEADER_HEIGHT - 4}
                   height={HEADER_HEIGHT - 4}
@@ -321,8 +321,8 @@ export const TopBar = ({
               </ButtonReset>
             ) : (
               <Link href="/" className={styles.logoLink} title="Crosshare Home">
-                <Image
-                  src="/logo.svg"
+                <img
+                  src="/Logo.png"
                   alt=""
                   width={HEADER_HEIGHT - 4}
                   height={HEADER_HEIGHT - 4}
