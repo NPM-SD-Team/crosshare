@@ -1078,13 +1078,13 @@ export const Puzzle = ({
                   }}
                 />
               )}
-              {/* <TopBarDropDownLink
+              <TopBarDropDownLink
                 icon={<FaKeyboard />}
                 text={t`Toggle Keyboard`}
                 onClick={() => {
                   setToggleKeyboard(!toggleKeyboard);
                 }}
-              /> */}
+              />
               {mounted && props.isAdmin ? (
                 <>
                   <TopBarDropDownLink
@@ -1302,6 +1302,18 @@ export const Puzzle = ({
                       ) : (
                         ''
                       )}
+                      
+                      <TopBarLinkA
+                        href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
+                        icon={<FaPrint />}
+                        text={t` `}//Print Puzzle
+                      />
+
+                    <TopBarLinkA
+                      href="/account"
+                      icon={<FaUser />}
+                      text={t` `}//Account
+                    />
                       <TopBarLink
                         icon={isSlate ? <Pause /> : <FaPause />}
                         hoverText={t`Pause Game`}
@@ -1333,11 +1345,6 @@ export const Puzzle = ({
                       ) : (
                         ''
                       )}
-                      <TopBarLinkA
-                        href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
-                        icon={<FaPrint />}
-                        text={t`Print Puzzle`}
-                      />
                       <TopBarLink
                         icon={<Rebus />}
                         text={t`Enter Rebus`}
@@ -1349,12 +1356,6 @@ export const Puzzle = ({
                           dispatch(kpa);
                         }}
                       />
-
-                    <TopBarLinkA
-                      href="/account"
-                      icon={<FaUser />}
-                      text={t`Account`}
-                    />
                       <TopBarLink
                         icon={
                           state.clueView ? (

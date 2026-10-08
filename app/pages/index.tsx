@@ -6,8 +6,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 import { AuthContext } from '../components/AuthContext.js';
-import { ContactLinks } from '../components/ContactLinks.js';
-import { CreateShareSection } from '../components/CreateShareSection.js';
 import { I18nTags } from '../components/I18nTags.js';
 import { Link } from '../components/Link.js';
 import { Markdown } from '../components/Markdown.js';
@@ -27,8 +25,6 @@ import { paginatedPuzzles } from '../lib/paginatedPuzzles.js';
 import { isUserPatron } from '../lib/patron.js';
 import {
   getMiniForDate,
-  getPreviousArticle,
-  maxWeeklyEmailArticle,
   userIdToPage,
 } from '../lib/serverOnly.js';
 import { withTranslation } from '../lib/translation.js';
@@ -44,8 +40,7 @@ type HomepagePuz = LinkablePuzzle & {
 interface HomePageProps {
   dailymini: HomepagePuz | null;
   throwbackMini: HomepagePuz | null;
-  lastEmailSlug: string | null;
-  featured: HomepagePuz[];
+  newest: HomepagePuz[];
   articles: ArticleT[];
   announcement: { title: string; body: Root } | null;
   homepageText: Root | null;
@@ -56,11 +51,7 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
   const todaysMini = await getMiniForDate(today);
   today.setUTCFullYear(today.getUTCFullYear() - 5);
   const throwback = await getMiniForDate(today);
-  const lastEmailRes = await getPreviousArticle(maxWeeklyEmailArticle());
-  const lastEmailSlug =
-    lastEmailRes !== null && typeof lastEmailRes !== 'string'
-      ? lastEmailRes.s
-      : null;
+  
 
   const [announcement, homepageText]: [
     { title: string; body: Root } | null,
@@ -103,11 +94,9 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
 
   const [puzzlesWithoutConstructor] = await paginatedPuzzles(
     0,
-    PAGE_SIZE,
-    'f',
-    true
+    PAGE_SIZE
   );
-  const featured = await Promise.all(
+  const newest = await Promise.all(
     puzzlesWithoutConstructor.map(async (p) => ({
       ...p,
       constructorPage: await userIdToPage(p.authorId),
@@ -143,8 +132,7 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
       homepageText,
       dailymini,
       throwbackMini,
-      lastEmailSlug,
-      featured,
+      newest: newest,
       articles,
     },
   };
@@ -152,22 +140,11 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
 
 export const getServerSideProps = withTranslation(gssp);
 
-const ArticleListItem = (props: ArticleT) => {
-  return (
-    <li key={props.s}>
-      <Link href={`/articles/${props.s}`}>{props.t}</Link>
-    </li>
-  );
-};
-
 export default function HomePage({
   announcement,
-  homepageText,
   dailymini,
   throwbackMini,
-  lastEmailSlug,
-  featured,
-  articles,
+  newest: newest,
 }: HomePageProps) {
   const today = new Date();
   const router = useRouter();
@@ -195,31 +172,9 @@ export default function HomePage({
         ) : (
           ''
         )}
-        {homepageText && router.locale === 'en' ? (
-          <Markdown hast={homepageText} className="marginBottom1em" />
-        ) : (
-          <>
-            <p className="marginBottom1em">
-              <Trans>
-                Crosshare is a <b>free</b>, <b>ad-free</b>, and{' '}
-                <a href="https://github.com/crosshare-org/crosshare">
-                  open-source
-                </a>{' '}
-                place to create, share and solve crossword puzzles.
-              </Trans>
-            </p>
-            <p>
-              <Trans>
-                If you&apos;re enjoying Crosshare please consider{' '}
-                <Link href="/donate">donating</Link> to support its continuing
-                development.
-              </Trans>
-            </p>
-          </>
-        )}
-        <div className={styles.top}>
+        <div className="marginBottom1em">
           {dailymini ? (
-            <div className="flex50">
+            <div>
               <h2>
                 <Trans>Daily Mini</Trans>
               </h2>
@@ -263,20 +218,23 @@ export default function HomePage({
           ) : (
             ''
           )}
-          <div className="flex50">
+          {/* <div className="flex50">
             <CreateShareSection halfWidth={true} />
-          </div>
+          </div> */}
         </div>
+        {user && !user.isAnonymous ? (
+          <>
+            <hr className="margin2em0" />
+            <UnfinishedPuzzleList user={user} />
+          </>
+        ) : (
+          ''
+        )}
         <hr className="margin2em0" />
         <h2 className="marginBottom0">
-          <Trans>Featured Puzzles</Trans>
+          <Trans>Newest Puzzles</Trans>
         </h2>
-        <div className="marginBottom1-5em">
-          <Link href="/newest">
-            <Trans>View all puzzles</Trans> &rarr;
-          </Link>
-        </div>
-        {featured.map((p, i) => (
+        {newest.map((p, i) => (
           <PuzzleResultLink
             key={i}
             puzzle={p}
@@ -287,44 +245,8 @@ export default function HomePage({
             filterTags={[]}
           />
         ))}
-        <p>
-          <Link href="/featured/1">
-            <Trans>Previous featured puzzles</Trans> &rarr;
-          </Link>
-        </p>
-        {user && !user.isAnonymous ? (
-          <>
-            <hr className="margin2em0" />
-            <UnfinishedPuzzleList user={user} />
-          </>
-        ) : (
-          ''
-        )}
         <hr className="margin2em0" />
-        <h4>Weekly Email</h4>
-        <p>
-          We send a once-weekly email with a recap of the most popular puzzles
-          of the week. To subscribe, visit{' '}
-          <Link href="/account">your account page</Link>.{' '}
-          {lastEmailSlug !== null ? (
-            <>
-              You can read our most recent weekly email{' '}
-              <Link href={`/articles/${lastEmailSlug}`}>here</Link>.
-            </>
-          ) : (
-            ''
-          )}
-        </p>
-        <h4 className="marginTop2em">
-          <Trans>Frequently asked questions and information</Trans>
-        </h4>
-        <ul className={styles.articles}>{articles.map(ArticleListItem)}</ul>
-        <p className={styles.contact}>
-          <Trans comment="the variable is a translated version of 'email or twitter'">
-            If you have questions or suggestions please contact us via{' '}
-            <ContactLinks />.
-          </Trans>
-        </p>
+        
       </div>
     </>
   );

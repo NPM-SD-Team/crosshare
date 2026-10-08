@@ -19,6 +19,7 @@ import {
   FaRegGrinStars,
   FaRegNewspaper,
   FaUser,
+  FaHome,
   FaUserLock,
 } from 'react-icons/fa';
 import { IoMdCloseCircleOutline } from 'react-icons/io';
@@ -302,32 +303,14 @@ export const TopBar = ({
                   {title}
                 </div>
               )
-            ) : filtered?.length && !showingNotifications ? (
-              <ButtonReset
-                onClick={(e) => {
-                  setShowingNotifications(true);
-                  e.stopPropagation();
-                }}
-                className={styles.notificationsBtn}
-                title="View Notifications"
-              >
-                <img
-                  src="/Logo.png"
-                  alt=""
-                  width={HEADER_HEIGHT - 4}
-                  height={HEADER_HEIGHT - 4}
-                />
-                <span className={styles.logoText}>CROSSHARE</span>
-              </ButtonReset>
+              
             ) : (
               <Link href="/" className={styles.logoLink} title="Crosshare Home">
-                <img
-                  src="/Logo.png"
-                  alt=""
-                  width={HEADER_HEIGHT - 4}
-                  height={HEADER_HEIGHT - 4}
+                <FaHome
+                  width={HEADER_HEIGHT - 1}
+                  height={HEADER_HEIGHT - 1}
                 />
-                <span className={styles.logoText}>CROSSHARE</span>
+                
               </Link>
             )}
             <>{children}</>
