@@ -26,7 +26,7 @@ import {
   isReplyNotification,
 } from '../../app/lib/notificationTypes.js';
 import { AccountPrefsT, AccountPrefsV } from '../../app/lib/prefs.js';
-import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
+import { firebaseCrosswordsDatabase } from '../../app/firebaseConfig.js';
 
 const joinStringsWithAnd = (vals: string[]) => {
   const dedup = Array.from(new Set(vals)).sort();
