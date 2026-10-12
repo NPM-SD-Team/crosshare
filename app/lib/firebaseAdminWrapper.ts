@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import cloneDeepWith from 'lodash/cloneDeepWith.js';
 import { firebaseConfig as firebaseEmulatorConfig } from '../firebaseConfig.emulators.js';
 import { firebaseConfig } from '../firebaseConfig.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 import { PathReporter } from './pathReporter.js';
 import { isTimestamp } from './timestamp.js';
 
@@ -36,7 +37,8 @@ export function overrideFirestore(f: FirebaseFirestore.Firestore | null) {
 }
 
 export const firestore = () =>
-  OVERRIDE_FIRESTORE || getFirestore(getAdminApp());
+  OVERRIDE_FIRESTORE ||
+  getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
 
 let OVERRIDE_TO_FIRESTORE: ((data: unknown) => Record<string, unknown>) | null;
 

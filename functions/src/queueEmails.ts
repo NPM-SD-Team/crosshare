@@ -26,6 +26,7 @@ import {
   isReplyNotification,
 } from '../../app/lib/notificationTypes.js';
 import { AccountPrefsT, AccountPrefsV } from '../../app/lib/prefs.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 
 const joinStringsWithAnd = (vals: string[]) => {
   const dedup = Array.from(new Set(vals)).sort();
@@ -48,7 +49,7 @@ async function queueEmailForUser(
   userId: string,
   notifications: NotificationT[]
 ) {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   const sorted = notifications.sort((n1, n2) => n1.id.localeCompare(n2.id));
   const prefsRes = await db.doc(`prefs/${userId}`).get();
   let prefs: AccountPrefsT | null = null;
@@ -201,7 +202,7 @@ async function queueEmailForUser(
 }
 
 export async function queueEmails() {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   const unread = await mapEachResult(
     db
       .collection('n')

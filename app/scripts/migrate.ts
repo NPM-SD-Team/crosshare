@@ -2,13 +2,14 @@
 
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAdminApp } from '../lib/firebaseAdminWrapper.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 export {};
 
 if (process.argv.length !== 2) {
   throw Error('Invalid use of migrate. Usage: ./scripts/migrate.ts');
 }
 
-const db = getFirestore(getAdminApp());
+const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
 
 async function runMigration() {
   console.log('Run migration here...');

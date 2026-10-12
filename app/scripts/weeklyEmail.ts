@@ -34,6 +34,7 @@ import { PathReporter } from '../lib/pathReporter.js';
 import { AccountPrefsV } from '../lib/prefs';
 import { sizeTag } from '../lib/sizeTag.js';
 import { slugify } from '../lib/utils.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 
 const readFile = util.promisify(fs.readFile);
 
@@ -57,7 +58,7 @@ const linksForEmail: Plugin = () => {
   };
 };
 
-const db = getFirestore(getAdminApp());
+const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
 
 function sumOnto(
   a: Record<string, number>,

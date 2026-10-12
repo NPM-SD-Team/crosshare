@@ -16,7 +16,7 @@ import { DBPuzzleV } from '../lib/dbtypes.js';
 import { getAdminApp, mapEachResult } from '../lib/firebaseAdminWrapper.js';
 import { PathReporter } from '../lib/pathReporter.js';
 
-const db = getFirestore(getAdminApp());
+const db = getFirestore(getAdminApp(), 'crosshare-npm-db');
 
 function getTag(month: number, year: number) {
   return `midi-contest-${String(month).padStart(2, '0')}-${String(year).slice(

@@ -3,6 +3,7 @@
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAdminApp } from '../lib/firebaseAdminWrapper.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 
 if (process.argv.length < 3) {
   throw Error(
@@ -20,7 +21,7 @@ export async function markBounced() {
 
     console.log('unsubbing', arg);
 
-    const db = getFirestore(getAdminApp());
+    const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
 
     await getAuth()
       .getUserByEmail(emailToUnsub)

@@ -3,7 +3,7 @@
 import { PubSub } from '@google-cloud/pubsub';
 
 const pubsubClient = new PubSub({
-  projectId: 'demo-crosshare',
+  projectId: 'demo-crosswords',
   apiEndpoint: 'localhost:8085',
   emulatorMode: true,
   port: 8085,

@@ -3,6 +3,7 @@ import { addDays } from 'date-fns';
 import { getAuth } from 'firebase-admin/auth';
 import { type Firestore, getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 import type { Root } from 'hast';
 import { GetServerSideProps } from 'next';
 import { NextPuzzleLink } from '../components/Puzzle.js';
@@ -75,7 +76,7 @@ const updateUserIdToPage = async (
 ): Promise<ConstructorPageWithMarkdown | null> => {
   console.log('updating username map', userid);
   const now = Date.now();
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   let dbres;
   try {
     dbres = await db.collection('cp').where('u', '==', userid).limit(1).get();
@@ -114,7 +115,7 @@ let barebonesCacheUpdated = 0;
 
 const updateBarebonesCache = async (): Promise<void> => {
   console.log('updating barebones cache');
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   let dbres;
   try {
     dbres = await db.collection('cache').doc('barebonesConstructorPages').get();
@@ -163,7 +164,7 @@ export async function userIdToConstructorPageWithPatron(
 export async function getArticle(
   slug: string
 ): Promise<string | ArticleT | null> {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   let dbres;
   try {
     dbres = await db.collection('a').where('s', '==', slug).get();
@@ -176,7 +177,7 @@ export async function getArticle(
 export async function getWeeklyEmailsFromYear(
   year: number
 ): Promise<ArticleT[] | string> {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   let dbres;
   try {
     // Assumes weekly email articles' slugs always start with weekly-email-year
@@ -204,7 +205,7 @@ export async function getWeeklyEmailsFromYear(
 export async function getPreviousArticle(
   slug: string
 ): Promise<string | ArticleT | null> {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   let dbres;
   try {
     dbres = await db
@@ -220,7 +221,7 @@ export async function getPreviousArticle(
 }
 
 async function getNextArticle(slug: string): Promise<string | ArticleT | null> {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   let dbres;
   try {
     dbres = await db
@@ -434,7 +435,7 @@ async function hasPackAccess(db: Firestore, token: string, packId: string) {
 export async function getPuzzle(
   puzzleId: string
 ): Promise<DBPuzzleWithIdT | null> {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   const dbres = await db.collection('c').doc(puzzleId).get();
   if (!dbres.exists) {
     return null;
@@ -454,7 +455,7 @@ export const getPuzzlePageProps: GetServerSideProps<PuzzlePageProps> = async ({
   locale,
   query,
 }) => {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
   let puzzleId = params?.puzzleId;
   let titleSlug = '';
   if (Array.isArray(puzzleId)) {

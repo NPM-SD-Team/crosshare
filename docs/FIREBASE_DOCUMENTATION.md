@@ -191,6 +191,7 @@ This is the central content record. The document ID is the puzzle ID referenced 
 c/{puzzleId}:
   a: author user ID
   n: author display name
+  c: string or null; obsolete legacy category field (normally null)
   t: puzzle title
   w, h: grid width and height
   g: solution grid (array of cell strings)
@@ -199,10 +200,31 @@ c/{puzzleId}:
   m: moderation state
   p: publication timestamp
   pv or pvu: private marker or public-availability timestamp
-  f, dmd, tg_u, tg_a, tg_f, tg_i: optional featured/daily-mini/tag metadata
+  f: boolean; whether selected as featured
+  dmd: string; scheduled daily-mini date
+  tg_u, tg_a, tg_f, tg_i: optional tag arrays (see field details below)
   cs: optional comments/replies embedded in the puzzle document
   pk: optional pack ID
 ```
+
+The puzzle-level `c` field is a legacy category field, not puzzle content and not the puzzle-ID reference named `c` in play documents (`p/{puzzleId}-{userId}.c`). `DBPuzzleV` still requires the field but permits either a string or `null`; the schema marks it obsolete. New puzzles must store `c: null`: the Firestore create rule explicitly rejects a missing or non-null value, and the author update rule requires the field to remain unchanged. This preserves the old schema contract without assigning new puzzles to the retired category system. Current categorization and discovery use fields such as `dmd` for daily-mini dates and `tg_u` / `tg_a` / `tg_f` / `tg_i` for tags instead.
+
+There is one legacy transition in the moderation UI: scheduling a daily mini temporarily updates `c` to `"dailymini"` alongside `dmd`, while the moderation action sets `c` back to `null`. Daily-mini lookup itself uses `dmd`, not this legacy category value. Do not use `c` for new category logic or remove it from imported puzzle documents; keeping it explicitly `null` is important for validator compatibility and for satisfying the Firestore rules.
+
+The optional featured and tag fields have specific types and roles:
+
+| Field | Firestore type | Purpose and maintenance |
+|---|---|---|
+| `f` | Boolean | Whether moderators have selected the puzzle as featured. `true` puzzles appear in featured listings and homepage selections. Puzzle-update processing also adds the `featured` automatic tag, and a transition from false/unset to true can generate a notification for the constructor. New client-created puzzles must not set this to true; featured status is applied later through moderation. |
+| `dmd` | String | The scheduled daily-mini date, stored as `M/D/YYYY` (for example, `"10/9/2026"`), not as a Firestore Timestamp. The moderation calendar writes it when scheduling a mini; daily-mini lookup queries puzzles by exact `dmd` value. A non-empty value also causes the `dailymini` automatic tag and can notify the constructor. Use the project's `getDateString()` / `prettifyDateString()` helpers when constructing the value to avoid timezone and formatting mismatches. |
+| `tg_u` | Array of strings | User-selected puzzle tags, such as `["cryptic", "themeless"]`. Authors and moderators edit this list through the tag editor. The UI normalizes values to lowercase slug-like tags (letters/numbers and hyphens), limits a tag to 20 characters, requires at least 3 characters, and allows at most 5 user tags per puzzle. User tags are combined with automatic tags to build the index. |
+| `tg_a` | Array of strings | Automatically generated tags, maintained by the `puzzleUpdate` processing in `app/lib/puzzleUpdate.ts`; do not treat this as the author-controlled tag list. It includes the puzzle size (`mini`, `midi`, `full`, or `jumbo`), any forced tags, `meta` for puzzles with contest answers, `featured` when `f` is true, `dailymini` when `dmd` is set, and a rating-band tag when the rating deviation is sufficiently low. |
+| `tg_f` | Array of strings | Curator-forced tags, edited separately from ordinary user tags in the moderation overlay. Puzzle-update processing includes them among automatic tags, so they appear in `tg_a` and consequently in the tag index. Note that the current author-update rule does not explicitly freeze `tg_f`; curator-only editing is an application convention rather than a restriction fully expressed by that rule. |
+| `tg_i` | Array of strings | Derived tag-index entries used for efficient Firestore filtering in tag pages. This is not simply a copy of the visible tags: the update code normalizes and deduplicates user tags plus automatic tags, sorts them, then stores each combination of one, two, or three tags as a string joined with spaces. The tag listing queries this array with `array-contains`, which lets multi-tag selections match a puzzle. It is recalculated when relevant tags change; avoid manually editing it. |
+
+Tag derivation is centralized in `updateTagsIfNeeded()` in `app/lib/puzzleUpdate.ts`, which runs from the Firestore puzzle-write trigger. The intended flow is: edit `tg_u` or `tg_f` / update puzzle metadata, compute `tg_a`, then derive `tg_i`. The tag browser in `app/pages/tags/[...path].tsx` queries `tg_i` with the selected normalized tags joined by spaces. Since the trigger is asynchronous, immediately after a source field changes the derived tag fields may briefly be stale.
+
+The Firestore schema validator in `DBPuzzleV` defines `f` as an optional boolean, `dmd` as an optional string, and each of `tg_u`, `tg_a`, `tg_f`, and `tg_i` as optional arrays of strings. Absence is valid; when present, use the stated type. Firestore rules also limit client-created puzzles to `f: false` or no `f`, disallow setting `dmd` and `tg_a` during client creation, and cap `tg_u` at fewer than six entries. The UI's stricter five-user-tag limit is therefore one less than the rules' upper bound.
 
 Comments and replies are currently represented as nested objects inside the puzzle's `cs` array, rather than as Firestore subcollections below `c/{puzzleId}`. Other optional puzzle fields include alternate solutions, notes, blog text, clue explanations, contest data, likes, ratings, style marks, and hidden cells. Avoid treating this abbreviated list as a complete schema; use `DBPuzzleV` as the canonical field definition.
 
@@ -247,6 +269,104 @@ These records are related by IDs and fields rather than by nesting. For example,
 - `a/{articleId}` stores article content. Article lookup and navigation use the `s` slug field; articles can also be marked featured with `f`. Article documents are loaded by server-side page helpers and used for articles and weekly-email archives.
 - `settings/settings` stores admin/site configuration, including automoderation controls, moderator UID lists, homepage announcement content, and optional homepage text. `settings/tags` is a separate settings document for public tag metadata. These are two documents in the same root collection, not separate collections.
 - `donations/donations` is an aggregate document containing a `d` array of donation records (email, date, donated/received amounts, name, page, and optional UID). Patron lookup reads this record and resolves users through the profile or Auth collections.
+
+##### Article configuration: `a/{articleId}`
+
+`ArticleV` in `app/lib/article.ts` defines the required stored fields:
+
+```text
+a/{articleId}:
+  s: article slug (string; used for lookup and URL)
+  c: article body (string; Markdown)
+  t: title (string)
+  f: featured on homepage (boolean)
+  ua: last-updated Firestore Timestamp or null
+```
+
+Use `s` as the canonical public slug and keep it unique: article pages look up documents by `s`, weekly-email navigation sorts/filters by it, and the homepage selects `f == true`. `articleId` often equals the slug, but this is not universal: contest articles are stored under IDs such as `tag:{tag}` while their `s` field is also set to that value. Do not assume the path ID is the lookup key; use the `s` field for route resolution.
+
+Article bodies are Markdown text, not pre-rendered HTML. The server converts the body for display. Generated weekly emails are stored in `a` too, with slugs in the `weekly-email-YYYY-MM-DD` form, a title, Markdown content, `f: false`, and `ua` set to the current Firestore timestamp.
+
+The admin editor at `/articles/{slug}/edit` creates and updates these documents. It writes `ua` each time the title, content, or featured flag changes. Article editing uses the client SDK, but `app/firestore.rules` only permits admins to read and write `a` documents. Public article routes use the Admin SDK on the server to load data; do not relax client rules just to make public article pages work. An initial article can be created through the admin editor or by an Admin SDK script, provided it satisfies `ArticleV`.
+
+Illustrative article document (the timestamp is shown as a placeholder; it must be a Firestore Timestamp in the database):
+
+```json
+{
+  "s": "weekly-email-2026-10-06",
+  "c": "## This week's puzzles\n\nA Markdown article body.",
+  "t": "This week's most popular crosswords",
+  "f": false,
+  "ua": "<Firestore Timestamp>"
+}
+```
+
+The timestamp placeholder above is explanatory, not a literal string to store. Use a Firestore `Timestamp` (or the project's timestamp conversion helpers).
+
+##### Site configuration: `settings/settings` and `settings/tags`
+
+The administrative site-settings document has a fixed ID: `settings/settings`. `AdminSettingsV` in `app/lib/dbtypes.ts` requires:
+
+```text
+settings/settings:
+  automoderate: boolean
+  noAuto: string[]                 # user IDs excluded from automatic moderation
+```
+
+It may also contain:
+
+```text
+  crypticMods: string[]            # moderator user IDs for cryptic puzzles
+  announcement:                   # optional homepage announcement
+    title: string
+    body: string                   # Markdown text
+  homepageText: string             # optional replacement homepage copy; Markdown
+```
+
+The settings document is read by the homepage, patron/moderator lookup code, the admin tools, and the `autoModerator` Cloud Function. The function expects a valid settings document and uses `automoderate` to decide whether to run; a malformed or missing document is an operational error for this scheduled task. For a clean setup, create the document with the two required fields even if automoderation is initially disabled:
+
+```json
+{
+  "automoderate": false,
+  "noAuto": [],
+  "crypticMods": []
+}
+```
+
+Enable `automoderate` only when the scheduled moderation workflow should process eligible comments. Add `announcement` only when one should be displayed, and set `homepageText` only when intentionally replacing the default homepage copy. `app/firestore.rules` limits reads and writes of `settings/settings` to admins. The admin UI edits homepage text, while other configuration may be maintained by trusted administrative code or Firebase Console with appropriate credentials.
+
+`settings/tags` is a distinct document used for public tag configuration. Its complete schema is not represented by a shared `io-ts` validator in the inspected code. One observed field is `disallowed`, an array of tag strings updated by the contest script to prevent a contest tag from being used. The rules permit public reads of this document but do not grant general client writes. Preserve existing fields when changing it, and follow the producer/consumer code rather than treating `disallowed` as a complete schema.
+
+##### Donations: `donations/donations`
+
+The app stores the donations ledger as one document at the fixed path `donations/donations`, validated by `DonationsListV` in `app/lib/dbtypes.ts`. Its shape is an object with a required `d` array:
+
+```text
+donations/donations:
+  d: [
+    {
+      e: string,                    # donor email
+      d: Firestore Timestamp,       # donation date
+      a: number,                    # amount donated
+      r: number,                    # amount received after fees
+      n: string | null,             # public/contributor name
+      p: string | null,             # constructor page/username
+      u?: string                    # Firebase UID, when explicitly known
+    }
+  ]
+```
+
+Create the empty ledger as `{ "d": [] }`, not as a collection with one document per donation. The admin page appends records to `d`; the donations script can print/edit entries and compact repeated donations. Compaction combines entries for the same email in the same calendar year, summing `a` and `r`, so keep the email consistent across records for a donor.
+
+The public `/donate` page and patron lookup both read this document on the server. The public page groups entries by email and emits only a reduced public shape (name, page, total threshold, and most recent donation date); it does not need to expose the raw ledger. Patron lookup uses an explicit `u` first, otherwise resolves `p` through `cp/{usernameLowercase}`, and finally falls back to Firebase Auth lookup by `e`. Set `u` when known and keep `p` normalized to the constructor profile username if using the page fallback.
+
+The ledger contains email addresses and donation amounts, so it must remain privileged data. `app/firestore.rules` permits only admins to read or write `donations/donations`; public rendering must continue through server-side Admin SDK code and return only the intended donor display fields. The admin donation form writes with `arrayUnion` and requires admin access. Avoid putting payment credentials or other secrets in this document.
+
+##### Recommended initialization and maintenance
+
+For an initial Firebase/emulator seed, create `settings/settings` with its required fields and `donations/donations` with an empty `d` array. Articles are optional and can be created as needed; validate them against `ArticleV`. The `settings/tags` document should be seeded from the project's existing emulator export or its tag-management workflow because its full schema is not centrally validated.
+
+When editing these documents, use the project's trusted admin UI/scripts or an Admin SDK task, keep Firestore-native timestamps native, validate the complete document with its `io-ts` decoder, and preserve fields not owned by the current operation. A missing or malformed article/settings/donations document can break rendering, moderation, or patron lookup even though Firestore itself accepts arbitrary document shapes.
 
 #### Moderation and reporting
 
@@ -404,9 +524,52 @@ This is a clear example of admin-side Firebase Storage use, especially for publi
 
 ## Authentication and authorization model
 
-### Client auth
+### How an account is created
 
-Browser clients sign in anonymously or with standard Firebase auth flows. The app does not appear to implement a custom JWT/session system; it relies on Firebase’s user identity and ID token claims.
+Firebase Authentication is the identity registry. An Auth user is not the same record as a Firestore profile: creating a Firebase Auth account does not automatically create `cp/{username}` or a full user document in Firestore. The project does not define a general-purpose Firestore `users/{uid}` collection.
+
+The currently wired non-anonymous sign-in method is Google OAuth in [app/components/GoogleButtons.tsx](../app/components/GoogleButtons.tsx), which calls Firebase `signInWithPopup()`. The Firebase project must have the Google provider enabled in Firebase Authentication, and its OAuth authorized domains must include the app's deployed hostnames and local development hostnames as required by the provider. Firebase creates or reuses the Auth user and returns a `UserCredential`; the app reads the resulting `User` and UID. There is no separate application-side password account-creation flow in the code inspected.
+
+The app also creates anonymous Firebase Auth users through `signInAnonymously()` in [app/lib/firebaseWrapper.ts](../app/lib/firebaseWrapper.ts). The puzzle component invokes this when an unsigned visitor completes a puzzle or submits contest metadata so the play can be saved under a UID. This is a real Auth account with `user.isAnonymous === true`, not a Firestore profile. It may exist before the visitor decides to create or connect a persistent account.
+
+### Upgrading a guest and preserving play data
+
+When an anonymous user reaches a page that requires a persistent account, [app/components/AuthHelpers.tsx](../app/components/AuthHelpers.tsx) offers Google sign-in/linking. [app/components/GoogleButtons.tsx](../app/components/GoogleButtons.tsx) first tries `linkWithPopup()` to link the Google credential to the existing anonymous UID. If that credential is already attached to another Firebase user, the code signs in as that user and migrates the anonymous user's saved play records:
+
+1. It queries the `p` collection for records where `u` is the anonymous UID.
+2. It removes/caches those records through the existing play persistence helpers.
+3. It writes each play under the signed-in user's new document ID, `puzzleId-newUid`, with `u` updated to the new UID.
+
+This conflict path merges puzzle progress, not every possible user-associated record. Do not assume it migrates profiles, preferences, follows, stats, or other account metadata. `linkWithPopup()` success retains the anonymous UID; collision-and-sign-in can result in a different UID, which is why the play IDs and `u` fields need to be rewritten.
+
+### Firestore records associated with an account
+
+Account-related Firestore records are created by feature workflows, not in one global user-creation transaction:
+
+- `p/{puzzleId}-{uid}` is created/updated when play progress is persisted by [app/lib/plays.ts](../app/lib/plays.ts). Anonymous solvers can have these records too.
+- `prefs/{uid}` is read by `useAuth()` and is written as the user changes solver preferences, email subscriptions, follows, or other settings. It can be created lazily through merge writes; an empty preference document is not required at Auth account creation.
+- `cp/{usernameLowercase}` is optional and created only when the signed-in user explicitly creates a constructor blog via [app/components/ConstructorPage.tsx](../app/components/ConstructorPage.tsx). It is one profile per selected username, containing `u` as the owning Auth UID. It is not automatically generated for every Google account.
+- `followers/{constructorUid}` and `prefs/{followerUid}.following` are updated by follow/unfollow actions, not by account creation.
+- `cs/{uid}` and `s/{puzzleId}` are aggregate puzzle-stat documents maintained by analytics and puzzle activity workflows; they are not the canonical Auth profile.
+- Optional profile and puzzle cover images are stored in Firebase Storage under paths such as `/users/{uid}/profile.jpg`, `/users/{uid}/cover.jpg`, and `/users/{uid}/{puzzleId}/cover.jpg`. They are uploaded separately and are not Auth user fields or Firestore account documents.
+
+The Auth UID is the main linking key: puzzle `a`, profile `cp.u`, preferences document ID, follower records, and play `u` all refer to that UID. User-facing code obtains the current `User` from Firebase Auth and then loads the optional Firestore records in [app/lib/useAuth.ts](../app/lib/useAuth.ts). Display names are held in Firebase Auth and, when a constructor profile exists, the account UI also updates its `cp` display-name field.
+
+### Initializing an account by hand
+
+For ordinary application use, create/sign in through the Google button; do not manually add a Firestore profile first. Firebase Authentication creates the Auth identity, and the user can then opt into a constructor profile and other features. To provision an account administratively:
+
+1. Create or locate the Auth user in Firebase Authentication (or with the Admin SDK) and obtain its UID.
+2. Do not copy credentials, passwords, or OAuth tokens into Firestore.
+3. Create `cp/{usernameLowercase}` only if a constructor page is intended. Follow the `ConstructorPageV` shape and Firestore rule constraints: `i` must normalize to the document ID, `u` must equal the Auth UID, `n` must be nonempty, `m` must be `true` on client creation, and `t` should be a server timestamp. Usernames are 3–20 characters and the rules reject reserved terms and non-word characters.
+4. Create `prefs/{uid}` only when there are actual settings to store. Its fields are optional and defined by `AccountPrefsV`; avoid seeding unnecessary defaults.
+5. Let the app create play, follow, and stats records through their normal workflows, or use the project’s schema validators and Admin SDK for intentional data migration.
+
+The Firestore client rules are not a substitute for Auth provisioning. In particular, the profile create rule requires a signed-in, non-anonymous client whose UID matches `cp.u`; Admin SDK writes bypass Firestore Security Rules and must enforce equivalent validation in trusted code.
+
+### Sign-in state and claims
+
+The app subscribes to Auth state using `useAuthState(getAuth())` in [app/lib/useAuth.ts](../app/lib/useAuth.ts). It passes the current user through `AuthContext` and treats anonymous and persistent users differently: account/dashboard/admin flows require a non-anonymous user, while anonymous users can retain and save solver progress.
 
 ### Admin and role detection
 
@@ -417,11 +580,20 @@ In `useAuth()`, the app fetches a user’s ID token result and checks for `claim
 
 This shows the project uses Firebase Auth not only for login but also as a role/claims-based authorization system.
 
+For the app routes, local emulator sign-in, and the procedure for granting an
+admin claim, see [Crosshare Admin Access](./CROSSHARE_ADMIN_ACCESS_DOCUMENTATION.md).
+
 ### Server verification
 
 Some API routes and backend operations verify Firebase ID tokens with `verifyIdToken(token)` from the Admin SDK. This is important for privileged endpoints that must ensure the caller is an authenticated user before performing actions.
 
 This pattern is common in apps that need to secure API operations without storing custom session cookies or JWTs of their own.
+
+### Account deletion and cleanup
+
+The `userDeletion` Firebase Auth `onDelete` trigger in [functions/src/index.ts](../functions/src/index.ts) handles cleanup when an Auth account is deleted. For users with an email (the function's proxy for non-anonymous accounts), it marks authored puzzles for deletion and deletes the constructor page, constructor stats, embed settings, and followers document. It deletes `prefs/{uid}` for every deleted Auth user. Puzzles are marked for deletion rather than immediately removed so the puzzle-update workflow can perform related cleanup.
+
+The scheduled `cleanUpAccounts` function also consumes `toClean` records, deletes the listed users' preference documents, and then deletes their Auth users in batches; the Auth deletion trigger performs the associated cleanup. Account migrations are a separate Admin SDK script (`app/scripts/migrateAccount.ts`) and move selected puzzle ownership, constructor profile ownership, stats, and follower references between two existing Auth UIDs. This is not an automatic operation performed during sign-in.
 
 ## Storage usage
 

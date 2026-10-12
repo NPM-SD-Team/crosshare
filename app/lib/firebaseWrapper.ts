@@ -22,6 +22,7 @@ import * as t from 'io-ts';
 import cloneDeepWith from 'lodash/cloneDeepWith.js';
 import { firebaseConfig as firebaseEmulatorConfig } from '../firebaseConfig.emulators.js';
 import { firebaseConfig } from '../firebaseConfig.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 import { PathReporter } from './pathReporter.js';
 import { isTimestamp } from './timestamp.js';
 
@@ -31,15 +32,20 @@ let db: Firestore;
 
 const apps = getApps();
 if (apps.length && apps[0]) {
+  console.log('Firebase Wrapper: Recieved app' + apps[0].name);
+
   App = apps[0];
-  db = getFirestore(App);
+  db = getFirestore(App, firebaseCrosswordsDatabase.databaseID);
 } else {
   // Init emulator
   if (process.env.NEXT_PUBLIC_USE_EMULATORS) {
     App = initializeApp(firebaseEmulatorConfig);
-    db = getFirestore(App);
+    db = getFirestore(App, firebaseCrosswordsDatabase.databaseID);
 
-    console.log('Connecting to emulators');
+    console.log(
+      'Connecting to emulators with app name: ' +
+        db.app.options.projectId?.toString()
+    );
     connectFirestoreEmulator(db, 'localhost', 8080);
 
     const auth = gA(App);
@@ -51,7 +57,7 @@ if (apps.length && apps[0]) {
     connectStorageEmulator(storage, 'localhost', 9199);
   } else {
     App = initializeApp(firebaseConfig);
-    db = getFirestore(App);
+    db = getFirestore(App, firebaseCrosswordsDatabase.databaseID);
   }
 }
 

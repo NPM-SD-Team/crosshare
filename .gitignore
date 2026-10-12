@@ -147,3 +147,4 @@ temp/
 
 .pnpm-store/
 TODO.md
+app/firebase.json

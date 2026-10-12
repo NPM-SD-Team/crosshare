@@ -10,6 +10,7 @@ import {
   PuzzleStatsV,
 } from '../lib/dbtypes.js';
 import { getAdminApp } from '../lib/firebaseAdminWrapper.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 
 if (process.argv.length !== 4) {
   throw Error(
@@ -20,7 +21,7 @@ if (process.argv.length !== 4) {
 // TODO we migrate followers but should we also migrate following?
 // TODO what about migrating solver prefs, etc.?
 
-const db = getFirestore(getAdminApp());
+const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
 
 async function migrateAccount() {
   const fromEmail = process.argv[2];

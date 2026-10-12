@@ -5,9 +5,10 @@ import { createInterface } from 'node:readline';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { getAdminApp } from '../lib/firebaseAdminWrapper.js';
+import { firebaseCrosswordsDatabase } from '../firebaseConfig.js';
 
 async function processLineByLine() {
-  const db = getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp(), firebaseCrosswordsDatabase.databaseID);
 
   const fileStream = createReadStream('opt-outs.txt');
 
