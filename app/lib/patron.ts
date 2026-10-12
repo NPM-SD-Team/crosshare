@@ -54,11 +54,12 @@ const getPatronList = async (): Promise<string[]> => {
 
 let patronListPromise: Promise<string[]> | null = null;
 const getPatronListOnce = () => {
-  if (!patronListPromise) {
+  patronListPromise = null;
+  /*if (!patronListPromise) {
     patronListPromise = getPatronList().finally(() => {
       patronListPromise = null;
     });
-  }
+  }*/
   return patronListPromise;
 };
 
@@ -70,7 +71,7 @@ export const isUserPatron = async (userId: string) => {
   ) {
     patronList = await getPatronListOnce();
   }
-  return patronList.includes(userId) || false;
+  return /*patronList.includes(userId) ||*/ false;
 };
 
 let modsList: string[] | null = null;
