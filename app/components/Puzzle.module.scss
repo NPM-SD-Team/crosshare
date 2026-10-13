@@ -115,3 +115,13 @@
 .topBarPuzzleMoreDropdown {
   --dropdown-col-width: 220px; /* Explicit width so that child content of each button is aligned */
 }
+
+.topBarLeft,
+.topBarRight {
+  display: flex;
+  align-items: center;
+}
+
+.topBarRight {
+  margin-left: auto;
+}

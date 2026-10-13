@@ -24,7 +24,6 @@ import {
   FaCog,
   FaComment,
   FaEdit,
-  FaEllipsisH,
   FaEye,
   FaGlasses,
   FaHammer,
@@ -159,6 +158,7 @@ import {
   TopBarLink,
   TopBarLinkA,
 } from './TopBar.js';
+import TitleBar from './TitleBar.js';
 
 const ModeratingOverlay = dynamic(
   () => import('./ModerateOverlay').then((mod) => mod.ModeratingOverlay),
@@ -1036,7 +1036,7 @@ export const Puzzle = ({
       <>
         <TopBarDropDown
           contentWidth={240}
-          icon={isSlate ? <More /> : <FaEllipsisH />}
+          icon={isSlate ? <More /> : <FaCog />}
           text={t`Settings`}
         >
           {(closeDropdown) => (
@@ -1184,7 +1184,7 @@ export const Puzzle = ({
                   ) : (
                     ''
                   )}
-                  
+
                   <TopBarDropDownLinkA
                     href="/construct"
                     icon={<FaHammer />}
@@ -1288,6 +1288,11 @@ export const Puzzle = ({
               ) : (
                 ''
               )}
+              <TitleBar
+                title={puzzle.title}
+                publishedAt={new Date(puzzle.publishTime)}
+                author={puzzle.authorName}
+              ></TitleBar>
               <TopBar title={puzzle.title}>
                 {!loadingPlayState ? (
                   !state.success ? (
@@ -1302,134 +1307,139 @@ export const Puzzle = ({
                       ) : (
                         ''
                       )}
-                      
-                      <TopBarLinkA
-                        href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
-                        icon={<FaPrint />}
-                        text={t` `}//Print Puzzle
-                      />
+                      <div className={styles.topBarLeft}>
+                        <TopBarLinkA
+                          href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
+                          icon={<FaPrint />}
+                          text={t` `} //Print Puzzle
+                        />
 
-                    <TopBarLinkA
-                      href="/account"
-                      icon={<FaUser />}
-                      text={t` `}//Account
-                    />
-                      <TopBarLink
-                        icon={isSlate ? <Pause /> : <FaPause />}
-                        hoverText={t`Pause Game`}
-                        text={
-                          isSlate
-                            ? 'Pause'
-                            : timeString(state.displaySeconds, true)
-                        }
-                        onClick={() => {
-                          window.parent.postMessage(
-                            {
-                              type: 'pause',
-                              elapsed: state.displaySeconds,
-                            },
-                            '*'
-                          );
-                          dispatch({ type: 'PAUSEACTION' });
-                          cachePlayForUser(props.user);
-                          writePlayToDBIfNeeded();
-                        }}
-                        keepText={!isSlate}
-                      />
-
-                      {isSlate ? (
-                        <>
-                          <div className="flexGrow1" />
-                          <SlateButtonMargin />
-                        </>
-                      ) : (
-                        ''
-                      )}
-                      <TopBarLink
-                        icon={<Rebus />}
-                        text={t`Enter Rebus`}
-                        onClick={() => {
-                          const kpa: KeypressAction = {
-                            type: 'KEYPRESS',
-                            key: { k: KeyK.Escape },
-                          };
-                          dispatch(kpa);
-                        }}
-                      />
-                      <TopBarLink
-                        icon={
-                          state.clueView ? (
-                            isSlate ? (
-                              <Grid />
-                            ) : (
-                              <SpinnerFinished />
-                            )
-                          ) : isSlate ? (
-                            <Clues />
-                          ) : (
-                            <FaListOl />
-                          )
-                        }
-                        text={state.clueView ? t`Grid` : t`Clues`}
-                        onClick={() => {
-                          const a: ToggleClueViewAction = {
-                            type: 'TOGGLECLUEVIEW',
-                          };
-                          dispatch(a);
-                        }}
-                      />
-                      {isSlate ? <SlateButtonMargin /> : ''}
-                      {state.draftMode && !isSlate ? (
+                        <TopBarLinkA
+                          href="/account"
+                          icon={<FaUser />}
+                          text={t` `} //Account
+                        />
                         <TopBarLink
-                          icon={<FaPencilAlt />}
-                          text={t`Drafting`}
+                          icon={isSlate ? <Pause /> : <FaPause />}
+                          hoverText={t`Pause Game`}
+                          text={
+                            isSlate
+                              ? 'Pause'
+                              : timeString(state.displaySeconds, true)
+                          }
+                          onClick={() => {
+                            window.parent.postMessage(
+                              {
+                                type: 'pause',
+                                elapsed: state.displaySeconds,
+                              },
+                              '*'
+                            );
+                            dispatch({ type: 'PAUSEACTION' });
+                            cachePlayForUser(props.user);
+                            writePlayToDBIfNeeded();
+                          }}
+                          keepText={!isSlate}
+                        />
+
+                        {isSlate ? (
+                          <>
+                            <div className="flexGrow1" />
+                            <SlateButtonMargin />
+                          </>
+                        ) : (
+                          ''
+                        )}
+                      </div>
+                      <div className={styles.topBarRight}>
+                        <TopBarLink
+                          icon={<Rebus />}
+                          text={t`Enter Rebus`}
                           onClick={() => {
                             const kpa: KeypressAction = {
                               type: 'KEYPRESS',
-                              key: { k: KeyK.Draft },
+                              key: { k: KeyK.Escape },
                             };
                             dispatch(kpa);
                           }}
                         />
-                      ) : (
-                        ''
-                      )}
-                      {checkRevealMenus}
-                      {isSlate ? <SlateButtonMargin /> : ''}
-                      {moreMenu}
+                        <TopBarLink
+                          icon={
+                            state.clueView ? (
+                              isSlate ? (
+                                <Grid />
+                              ) : (
+                                <SpinnerFinished />
+                              )
+                            ) : isSlate ? (
+                              <Clues />
+                            ) : (
+                              <FaListOl />
+                            )
+                          }
+                          text={state.clueView ? t`Grid` : t`Clues`}
+                          onClick={() => {
+                            const a: ToggleClueViewAction = {
+                              type: 'TOGGLECLUEVIEW',
+                            };
+                            dispatch(a);
+                          }}
+                        />
+                        {isSlate ? <SlateButtonMargin /> : ''}
+                        {state.draftMode && !isSlate ? (
+                          <TopBarLink
+                            icon={<FaPencilAlt />}
+                            text={t`Drafting`}
+                            onClick={() => {
+                              const kpa: KeypressAction = {
+                                type: 'KEYPRESS',
+                                key: { k: KeyK.Draft },
+                              };
+                              dispatch(kpa);
+                            }}
+                          />
+                        ) : (
+                          ''
+                        )}
+                        {checkRevealMenus}
+                        {isSlate ? <SlateButtonMargin /> : ''}
+                        {moreMenu}
+                      </div>
                     </>
                   ) : (
                     <>
                       {isSlate ? <div className="flexGrow1" /> : ''}
-                      <TopBarLink
-                        icon={isSlate ? <Stats /> : <FaComment />}
-                        text={
-                          isSlate
-                            ? 'Show Stats'
-                            : puzzle.isContest
-                              ? !isMetaSolution(
-                                  state.contestSubmission,
-                                  puzzle.contestAnswers,
-                                  puzzle.contestAnswerDigests,
-                                  puzzle.id
-                                ) && !state.contestRevealed
-                                ? t`Contest Prompt / Submission`
-                                : t`Comments / Leaderboard`
-                              : t`Show Comments`
-                        }
-                        onClick={() => {
-                          window.parent.postMessage(
-                            {
-                              type: 'show-completion-modal',
-                            },
-                            '*'
-                          );
+                      <div className={styles.topBarRight}>
+                        <TopBarLink
+                          icon={isSlate ? <Stats /> : <FaComment />}
+                          text={
+                            isSlate
+                              ? 'Show Stats'
+                              : puzzle.isContest
+                                ? !isMetaSolution(
+                                    state.contestSubmission,
+                                    puzzle.contestAnswers,
+                                    puzzle.contestAnswerDigests,
+                                    puzzle.id
+                                  ) && !state.contestRevealed
+                                  ? t`Contest Prompt / Submission`
+                                  : t`Comments / Leaderboard`
+                                : t`Show Comments`
+                          }
+                          onClick={() => {
+                            window.parent.postMessage(
+                              {
+                                type: 'show-completion-modal',
+                              },
+                              '*'
+                            );
 
-                          dispatch({ type: 'UNDISMISSSUCCESS' });
-                        }}
-                      />
-                      {isSlate ? <SlateButtonMargin /> : ''}
-                      {moreMenu}
+                            dispatch({ type: 'UNDISMISSSUCCESS' });
+                          }}
+                        />
+                        {isSlate ? <SlateButtonMargin /> : ''}
+                        {moreMenu}
+                      </div>
                     </>
                   )
                 ) : (

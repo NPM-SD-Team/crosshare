@@ -1,7 +1,6 @@
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { updateDoc } from 'firebase/firestore';
-import Image from 'next/image';
 import {
   CSSProperties,
   ReactNode,
@@ -16,21 +15,20 @@ import {
   FaComment,
   FaComments,
   FaHammer,
+  FaHome,
   FaRegGrinStars,
   FaRegNewspaper,
   FaUser,
-  FaHome,
   FaUserLock,
 } from 'react-icons/fa';
 import { IoMdCloseCircleOutline } from 'react-icons/io';
 import { getDocRef } from '../lib/firebaseWrapper.js';
 import { NotificationT } from '../lib/notificationTypes.js';
-import { ANIMATION_DELAY, HEADER_HEIGHT } from '../lib/style.js';
+import { ANIMATION_DELAY } from '../lib/style.js';
 import { logAsyncErrors, slugify } from '../lib/utils.js';
 import { AuthContext } from './AuthContext.js';
-import { ButtonAsLink, ButtonReset } from './Buttons.js';
+import { ButtonAsLink } from './Buttons.js';
 import { EmbedContext } from './EmbedContext.js';
-import { Logo } from './Icons.js';
 import { Link } from './Link.js';
 import { Overlay } from './Overlay.js';
 import styles from './TopBar.module.scss';
@@ -303,14 +301,9 @@ export const TopBar = ({
                   {title}
                 </div>
               )
-              
             ) : (
-              <Link href="/" className={styles.logoLink} title="Crosshare Home">
-                <FaHome
-                  width={HEADER_HEIGHT - 1}
-                  height={HEADER_HEIGHT - 1}
-                />
-                
+              <Link href="/" className={styles.homeLink} title=" ">
+                <FaHome className={styles.homeIcon} aria-hidden="true" />
               </Link>
             )}
             <>{children}</>
@@ -343,15 +336,7 @@ export const TopBar = ({
         )}
       </>
     );
-  }, [
-    children,
-    filtered,
-    showingNotifications,
-    setShowingNotifications,
-    isEmbed,
-    isSlate,
-    title,
-  ]);
+  }, [children, filtered, showingNotifications, isEmbed, isSlate, title]);
 };
 
 const NotificationLink = ({

@@ -1,12 +1,6 @@
 /* stylelint-disable declaration-property-value-no-unknown */
 @use '../lib/definitions' as *;
 
-.notificationsBtn {
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-}
-
 .dropdownLinkIcon {
   display: inline-flex;
   align-items: center;
@@ -279,21 +273,35 @@
   white-space: nowrap;
 }
 
-.logoText {
-  display: none;
-  margin-left: 5px;
-  font-size: calc($header-height - 10px);
-  color: var(--onprimary);
-}
-
-.logoLink {
+.homeLink {
   cursor: pointer;
 
   display: flex;
-  flex-grow: 1;
+  flex: 0 0 auto;
   align-items: center;
+  justify-content: center;
 
+  height: 100%;
+  padding: 0 0.45em;
+
+  color: var(--onprimary);
   text-decoration: none !important;
+}
+
+.homeIcon {
+  display: block;
+
+  width: 1em;
+  height: 1em;
+
+  font-size: calc($header-height - 10px);
+}
+
+.homeLink:hover,
+.homeLink:focus {
+  color: #fff;
+  text-decoration: none;
+  background-color: rgb(0 0 0 / 10%);
 }
 
 .notifications {
@@ -390,8 +398,7 @@
   }
 
   .linkContentsText[data-slate='false'],
-  .embedTitle,
-  .logoText {
+  .embedTitle {
     display: inline-block;
   }
 
