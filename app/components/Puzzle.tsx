@@ -26,14 +26,12 @@ import {
   FaEdit,
   FaEye,
   FaGlasses,
-  FaHammer,
   FaKeyboard,
   FaListOl,
   FaMoon,
   FaPause,
   FaPencilAlt,
   FaPrint,
-  FaRegFile,
   FaUser,
   FaUserLock,
   FaVolumeMute,
@@ -115,7 +113,6 @@ import {
   CheckEntry,
   CheckPuzzle,
   CheckSquare,
-  EscapeKey,
   PeriodKey,
   Rebus,
   RevealEntry,
@@ -149,12 +146,10 @@ import { SlateBegin, SlatePause } from './SlateOverlays.js';
 import { useSnackbar } from './Snackbar.js';
 import { SolverPreferencesList } from './SolverPreferencesList.js';
 import {
-  NestedDropDown,
   TopBar,
   TopBarDropDown,
   TopBarDropDownLink,
   TopBarDropDownLinkA,
-  TopBarDropDownLinkSimpleA,
   TopBarLink,
   TopBarLinkA,
 } from './TopBar.js';
@@ -1037,9 +1032,9 @@ export const Puzzle = ({
         <TopBarDropDown
           contentWidth={240}
           icon={isSlate ? <More /> : <FaCog />}
-          text={t`Settings`}
+          text={t` `}
         >
-          {(closeDropdown) => (
+          {() => (
             <div className={styles.topBarPuzzleMoreDropdown}>
               {!state.success ? (
                 <>
@@ -1135,22 +1130,6 @@ export const Puzzle = ({
                 ''
               ) : (
                 <>
-                  {puzzle.hBars.length || puzzle.vBars.length ? (
-                    ''
-                  ) : (
-                    <TopBarDropDownLinkSimpleA
-                      href={'/api/puz/' + puzzle.id}
-                      icon={<FaRegFile />}
-                      text={t`Download .puz File`}
-                      download={`${puzzle.title.replace(/[^\w ]/g, '')}.puz`}
-                    />
-                  )}
-                  <TopBarDropDownLinkSimpleA
-                    href={'/api/ipuz/' + puzzle.id}
-                    icon={<FaRegFile />}
-                    text={t`Download .ipuz File`}
-                    download={`${puzzle.title.replace(/[^\w ]/g, '')}.ipuz`}
-                  />
                   {!isEmbed ? (
                     <TopBarDropDownLink
                       icon={<FaMoon />}
@@ -1161,35 +1140,26 @@ export const Puzzle = ({
                     />
                   ) : null}
                   {mounted && user !== undefined && !user.isAnonymous ? (
-                    <NestedDropDown
-                      closeParent={closeDropdown}
-                      icon={<FaCog />}
-                      text={'Solver Preferences'}
-                    >
-                      {() => (
-                        <ul
-                          className={styles.solverPrefList}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                          role="presentation"
-                        >
-                          <SolverPreferencesList
-                            prefs={props.prefs}
-                            userId={user.uid}
-                          />
-                        </ul>
-                      )}
-                    </NestedDropDown>
+                    <>
+                      <h2 className={styles.solverPreferencesHeader}>
+                        {t`Solver Preferences`}
+                      </h2>
+                      <ul
+                        className={styles.solverPrefList}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        role="presentation"
+                      >
+                        <SolverPreferencesList
+                          prefs={props.prefs}
+                          userId={user.uid}
+                        />
+                      </ul>
+                    </>
                   ) : (
                     ''
                   )}
-
-                  <TopBarDropDownLinkA
-                    href="/construct"
-                    icon={<FaHammer />}
-                    text={t`Construct a Puzzle`}
-                  />
                 </>
               )}
             </div>
@@ -1308,61 +1278,53 @@ export const Puzzle = ({
                         ''
                       )}
                       <div className={styles.topBarLeft}>
-                        <TopBarLinkA
-                          href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
-                          icon={<FaPrint />}
-                          text={t` `} //Print Puzzle
-                        />
+                        {moreMenu}
+                        <div className={styles.topBarLeftControls}>
+                          <TopBarLinkA
+                            href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
+                            icon={<FaPrint />}
+                            text={t` `} //Print Puzzle
+                          />
 
-                        <TopBarLinkA
-                          href="/account"
-                          icon={<FaUser />}
-                          text={t` `} //Account
-                        />
-                        <TopBarLink
-                          icon={isSlate ? <Pause /> : <FaPause />}
-                          hoverText={t`Pause Game`}
-                          text={
-                            isSlate
-                              ? 'Pause'
-                              : timeString(state.displaySeconds, true)
-                          }
-                          onClick={() => {
-                            window.parent.postMessage(
-                              {
-                                type: 'pause',
-                                elapsed: state.displaySeconds,
-                              },
-                              '*'
-                            );
-                            dispatch({ type: 'PAUSEACTION' });
-                            cachePlayForUser(props.user);
-                            writePlayToDBIfNeeded();
-                          }}
-                          keepText={!isSlate}
-                        />
+                          <TopBarLinkA
+                            href="/account"
+                            icon={<FaUser />}
+                            text={t` `} //Account
+                          />
+                          <TopBarLink
+                            icon={isSlate ? <Pause /> : <FaPause />}
+                            hoverText={t`Pause Game`}
+                            text={
+                              isSlate
+                                ? 'Pause'
+                                : timeString(state.displaySeconds, true)
+                            }
+                            onClick={() => {
+                              window.parent.postMessage(
+                                {
+                                  type: 'pause',
+                                  elapsed: state.displaySeconds,
+                                },
+                                '*'
+                              );
+                              dispatch({ type: 'PAUSEACTION' });
+                              cachePlayForUser(props.user);
+                              writePlayToDBIfNeeded();
+                            }}
+                            keepText={!isSlate}
+                          />
 
-                        {isSlate ? (
-                          <>
-                            <div className="flexGrow1" />
-                            <SlateButtonMargin />
-                          </>
-                        ) : (
-                          ''
-                        )}
+                          {isSlate ? (
+                            <>
+                              <div className="flexGrow1" />
+                              <SlateButtonMargin />
+                            </>
+                          ) : (
+                            ''
+                          )}
+                        </div>
                       </div>
                       <div className={styles.topBarRight}>
-                        <TopBarLink
-                          icon={<Rebus />}
-                          text={t`Enter Rebus`}
-                          onClick={() => {
-                            const kpa: KeypressAction = {
-                              type: 'KEYPRESS',
-                              key: { k: KeyK.Escape },
-                            };
-                            dispatch(kpa);
-                          }}
-                        />
                         <TopBarLink
                           icon={
                             state.clueView ? (
@@ -1385,6 +1347,17 @@ export const Puzzle = ({
                             dispatch(a);
                           }}
                         />
+                        <TopBarLink
+                          icon={<Rebus />}
+                          text={t` `}
+                          onClick={() => {
+                            const kpa: KeypressAction = {
+                              type: 'KEYPRESS',
+                              key: { k: KeyK.Escape },
+                            };
+                            dispatch(kpa);
+                          }}
+                        />
                         {isSlate ? <SlateButtonMargin /> : ''}
                         {state.draftMode && !isSlate ? (
                           <TopBarLink
@@ -1403,12 +1376,12 @@ export const Puzzle = ({
                         )}
                         {checkRevealMenus}
                         {isSlate ? <SlateButtonMargin /> : ''}
-                        {moreMenu}
                       </div>
                     </>
                   ) : (
                     <>
                       {isSlate ? <div className="flexGrow1" /> : ''}
+                      <div className={styles.topBarLeft}>{moreMenu}</div>
                       <div className={styles.topBarRight}>
                         <TopBarLink
                           icon={isSlate ? <Stats /> : <FaComment />}
@@ -1438,14 +1411,13 @@ export const Puzzle = ({
                           }}
                         />
                         {isSlate ? <SlateButtonMargin /> : ''}
-                        {moreMenu}
                       </div>
                     </>
                   )
                 ) : (
                   <>
                     {isSlate ? <div className="flexGrow1" /> : ''}
-                    {moreMenu}
+                    <div className={styles.topBarLeft}>{moreMenu}</div>
                   </>
                 )}
               </TopBar>

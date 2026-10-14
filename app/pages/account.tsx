@@ -9,10 +9,11 @@ import {
 } from 'firebase/firestore';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useContext } from 'react';
 import { useCollection } from 'react-firebase-hooks/firestore';
 import { AuthProps, requiresAuth } from '../components/AuthHelpers.js';
 import { BioEditor } from '../components/BioEditor.js';
+import { AuthContext } from '../components/AuthContext.js';
 import { Button } from '../components/Buttons.js';
 import { CreatePageForm } from '../components/ConstructorPage.js';
 import {
@@ -100,6 +101,7 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
   const [authoredSnap] = useCollection(authoredQuery);
   const [colorPref, setColorPref] = useDarkModeControl();
   const [muted, setMuted] = usePersistedBoolean('muted', true);
+  const ctxt = useContext(AuthContext);
 
   useEffect(() => {
     if (authoredSnap && authoredSnap.size >= 0) {
@@ -135,30 +137,23 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
           is displayed next to any comments you make or puzzles you create.
         </p>
         <DisplayNameForm />
-        <h3>Newsletter</h3>
-        <p>Email me (to {user.email}, at most once per week):</p>
-        <ul className="listStyleTypeNone">
-          <li>
-            <UnsubSetting
-              prefs={prefs}
-              userId={user.uid}
-              flag="weekly"
-              neverDisable
-              text="A write up of the most popular puzzles in the previous week along with any Crosshare announcements"
-            />
-          </li>
-        </ul>
         <h3>Notification Settings</h3>
         <p>Email me (to {user.email}, at most once per day) when:</p>
         <ul className="listStyleTypeNone">
-          <li>
-            <UnsubSetting
-              prefs={prefs}
-              userId={user.uid}
-              flag="comments"
-              text="I have unseen comments on my puzzles or replies to my comments"
-            />
-          </li>
+          {ctxt.isAdmin ? (
+            <>
+              <li>
+                <UnsubSetting
+                  prefs={prefs}
+                  userId={user.uid}
+                  flag="comments"
+                  text="I have unseen comments on my puzzles or replies to my comments"
+                />
+              </li>
+            </>
+          ) : (
+            ''
+          )}
           <li>
             <UnsubSetting
               prefs={prefs}

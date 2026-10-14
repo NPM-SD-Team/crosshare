@@ -50,8 +50,22 @@
 }
 
 .solverPrefList {
-  padding: 0 10vw;
+  margin: 0;
+  padding: 0 0.75rem 0.5rem;
   list-style-type: none;
+}
+
+.solverPrefList li + li {
+  margin-top: 0.5rem;
+}
+
+.solverPreferencesHeader {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem 0;
+  border-top: 1px solid var(--text-input-border);
+
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .wrapper {
@@ -117,6 +131,7 @@
 }
 
 .topBarLeft,
+.topBarLeftControls,
 .topBarRight {
   display: flex;
   align-items: center;
