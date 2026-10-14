@@ -28,7 +28,7 @@ import {
 } from '../components/SolverPreferencesList.js';
 import { DefaultTopBar } from '../components/TopBar.js';
 import { getAuth, getCollection, getDocRef } from '../lib/firebaseWrapper.js';
-import { useDarkModeControl, usePersistedBoolean } from '../lib/hooks.js';
+// import { useDarkModeControl, usePersistedBoolean } from '../lib/hooks.js';
 import { AccountPrefsT, UnsubscribeFlags } from '../lib/prefs.js';
 import { COVER_PIC, PROFILE_PIC } from '../lib/style.js';
 import { withStaticTranslation } from '../lib/translation.js';
@@ -99,8 +99,7 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
     [user.uid]
   );
   const [authoredSnap] = useCollection(authoredQuery);
-  const [colorPref, setColorPref] = useDarkModeControl();
-  const [muted, setMuted] = usePersistedBoolean('muted', true);
+  // const [muted, setMuted] = usePersistedBoolean('muted', true);
   const ctxt = useContext(AuthContext);
 
   useEffect(() => {
@@ -147,7 +146,7 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
                   prefs={prefs}
                   userId={user.uid}
                   flag="comments"
-                  text="I have unseen comments on my puzzles or replies to my comments"
+                  text="I have unseen comments on my puzzles or replies to my comments(Admin only)"
                 />
               </li>
             </>
@@ -160,14 +159,6 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
               userId={user.uid}
               flag="newpuzzles"
               text="A constructor I follow publishes a new puzzle"
-            />
-          </li>
-          <li>
-            <UnsubSetting
-              prefs={prefs}
-              userId={user.uid}
-              flag="featured"
-              text="One of my puzzles is chosen as a Crosshare featured puzzle or daily mini"
             />
           </li>
           <li>
@@ -187,53 +178,8 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
           <SolverPreferencesList prefs={prefs} userId={user.uid} />
         </ul>
         <hr className="margin2em0" />
-        <h2>Browser-specific Settings</h2>
-        <h3>Color Theme</h3>
-        <label>
-          <input
-            className="marginRight0-5em"
-            type="radio"
-            name="theme"
-            value="default"
-            checked={colorPref === null}
-            onChange={(e) => {
-              if (e.currentTarget.value !== 'default') return;
-              setColorPref(null);
-            }}
-          />{' '}
-          Use browser/OS setting
-        </label>
-        <br />
-        <label>
-          <input
-            className="marginRight0-5em"
-            type="radio"
-            name="theme"
-            value="dark"
-            checked={colorPref === 'dark'}
-            onChange={(e) => {
-              if (e.currentTarget.value !== 'dark') return;
-              setColorPref('dark');
-            }}
-          />{' '}
-          Use dark mode
-        </label>
-        <br />
-        <label>
-          <input
-            className="marginRight0-5em"
-            type="radio"
-            name="theme"
-            value="light"
-            checked={colorPref === 'light'}
-            onChange={(e) => {
-              if (e.currentTarget.value !== 'light') return;
-              setColorPref('light');
-            }}
-          />{' '}
-          Use light mode
-        </label>
-        <h3>Audio</h3>
+
+        {/* <h3>Audio</h3>
         <label>
           <input
             className="marginRight1em"
@@ -244,58 +190,64 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
             }}
           />
           Mute success music
-        </label>
-
-        <hr className="margin2em0" />
-        <h2>Crossword Blog</h2>
-        {hasAuthoredPuzzle ? (
-          <CreatePageForm
-            className={constructorPage ? 'displayNone' : 'displayBlock'}
-          />
-        ) : (
-          <p>
-            Start sharing your own puzzles by creating one with the{' '}
-            <Link href="/construct">Crosshare constructor</Link> or{' '}
-            <Link href="/upload">uploading a .puz or .ipuz file.</Link>
-          </p>
-        )}
-        {constructorPage ? (
+        </label> */}
+        {ctxt.isAdmin ? (
           <>
-            <p>
-              Your blog is live at{' '}
-              <Link href={'/' + constructorPage.i}>
-                https://crosshare.org/{constructorPage.i}
-              </Link>
-            </p>
-            <h3>Blog settings</h3>
-            <p>
-              Note: changes may take up to an hour to appear on the site - we
-              cache pages to keep Crosshare fast!
-            </p>
-            <BioEditor
-              constructorPage={constructorPage}
-              addProfilePic={() => {
-                setSettingProfilePic(true);
-              }}
-              addCoverPic={() => {
-                setSettingCoverPic(true);
-              }}
-            />
+            <h1>Admin Settings</h1>
+            <hr className="margin2em0" />
+            <h2>Crossword Blog</h2>
+            {hasAuthoredPuzzle ? (
+              <CreatePageForm
+                className={constructorPage ? 'displayNone' : 'displayBlock'}
+              />
+            ) : (
+              <p>
+                Start sharing your own puzzles by creating one with the{' '}
+                <Link href="/construct">Crosshare constructor</Link> or{' '}
+                <Link href="/upload">uploading a .puz or .ipuz file.</Link>
+              </p>
+            )}
+            {constructorPage ? (
+              <>
+                <p>
+                  Your blog is live at{' '}
+                  <Link href={'/' + constructorPage.i}>
+                    https://crosshare.org/{constructorPage.i}
+                  </Link>
+                </p>
+                <h3>Blog settings</h3>
+                <p>
+                  Note: changes may take up to an hour to appear on the site -
+                  we cache pages to keep Crosshare fast!
+                </p>
+                <BioEditor
+                  constructorPage={constructorPage}
+                  addProfilePic={() => {
+                    setSettingProfilePic(true);
+                  }}
+                  addCoverPic={() => {
+                    setSettingCoverPic(true);
+                  }}
+                />
+              </>
+            ) : (
+              ''
+            )}
+            <h2>Constructor Preferences</h2>
+            <ul className={styles.list}>
+              <li>
+                <PrefSetting
+                  prefs={prefs}
+                  userId={user.uid}
+                  flag={'disableCommentsByDefault'}
+                  text="Disable comments by default on newly constructed/uploaded puzzles (not recommended)"
+                />
+              </li>
+            </ul>
           </>
         ) : (
           ''
         )}
-        <h2>Constructor Preferences</h2>
-        <ul className={styles.list}>
-          <li>
-            <PrefSetting
-              prefs={prefs}
-              userId={user.uid}
-              flag={'disableCommentsByDefault'}
-              text="Disable comments by default on newly constructed/uploaded puzzles (not recommended)"
-            />
-          </li>
-        </ul>
       </div>
       {settingProfilePic ? (
         <ImageCropper

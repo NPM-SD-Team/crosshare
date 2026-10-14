@@ -156,17 +156,17 @@ export default function CrosshareApp({
     <>
       <Head>
         <title>
-          {`Crosshare - Free Crossword Constructor and Daily Mini Crossword Puzzles`}
+          {`Nebraska Public Media Crosswords - Free daily crosswords`}
         </title>
         <meta
           key="og:title"
           property="og:title"
-          content="Crosshare Crosswords"
+          content="Nebraska Public Media Crosswords"
         />
         <meta
           key="description"
           name="description"
-          content="Crosshare is a community for crossword constructors and solvers. Each day we post a new mini crossword puzzle you can play for free."
+          content="Nebraska Public Media Posts daily crosswords for free. Play now!"
         />
         <meta
           key="og:description"

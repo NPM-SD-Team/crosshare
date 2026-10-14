@@ -17,8 +17,9 @@ export function PublishDate(props: {
     if (props.isPrivate !== false) {
       return (
         <span className={clsx(props.useErrorColor && 'colorError')}>
-          <Trans comment="The variable is a timestamp like '4 days ago' or 'hace 4 dias'">
-            Published privately <PastDistanceToNow date={publishDate} />
+          <Trans comment="The variable is the weekday when the puzzle was published">
+            Published privately{' '}
+            <PastDistanceToNow date={publishDate} weekday={true} />
           </Trans>
         </span>
       );
@@ -37,8 +38,8 @@ export function PublishDate(props: {
   }
 
   return (
-    <Trans comment="The variable is a timestamp like '4 days ago' or 'hace 4 dias'">
-      Published <PastDistanceToNow date={publishDate} />
+    <Trans comment="The variable is the weekday when the puzzle was published">
+      Published <PastDistanceToNow date={publishDate} weekday={true} />
     </Trans>
   );
 }
