@@ -11,6 +11,7 @@ import { getValidatedAndDelete, setInCache } from '../lib/dbUtils.js';
 import { LegacyPlayV } from '../lib/dbtypes.js';
 import { getAuth, getCollection } from '../lib/firebaseWrapper.js';
 import { event } from '../lib/gtag.js';
+import { withBasePath } from '../lib/basePath.js';
 import { ButtonAsLink } from './Buttons.js';
 
 interface GoogleButtonProps {
@@ -59,7 +60,7 @@ export const GoogleSignInButton = ({ postSignIn, text }: GoogleButtonProps) => {
       type="image"
       width="191"
       height="46"
-      src="/googlesignin.png"
+      src={withBasePath('/googlesignin.png')}
       alt="Sign in with Google"
       onClick={signin}
     />
@@ -143,7 +144,7 @@ export const GoogleLinkButton = ({
       type="image"
       width="191"
       height="46"
-      src="/googlesignin.png"
+      src={withBasePath('/googlesignin.png')}
       alt="Sign in with Google"
       onClick={signin}
     />

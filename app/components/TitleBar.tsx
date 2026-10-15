@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import { withBasePath } from '../lib/basePath.js';
 import styles from './TitleBar.module.scss';
 
 interface TitleBarProps {
@@ -26,7 +27,7 @@ export default function TitleBar({
           className={styles.logoLink}
         >
           <img
-            src="/Logo.png"
+            src={withBasePath('/Logo.png')}
             alt=""
             width={36}
             height={36}

@@ -1,4 +1,5 @@
 import Document, { Head, Html, Main, NextScript } from 'next/document';
+import { withBasePath } from '../lib/basePath.js';
 import { GA_TRACKING_ID } from '../lib/gtag.js';
 
 export default class CrosshareDocument extends Document {
@@ -11,7 +12,7 @@ export default class CrosshareDocument extends Document {
             rel="icon"
             type="image/png"
             sizes="32x32"
-            href="/favicon-32x32.png"
+            href={withBasePath('/favicon-32x32.png')}
           />
           <meta
             name="theme-color"
@@ -23,126 +24,126 @@ export default class CrosshareDocument extends Document {
             content="#764c27"
             media="(prefers-color-scheme: dark)"
           />
-          <link rel="manifest" href="/manifest.json" />
+          <link rel="manifest" href={withBasePath('/manifest.json')} />
           <link
             rel="apple-touch-icon"
             sizes="180x180"
-            href="/apple-icon-180.png"
+            href={withBasePath('/apple-icon-180.png')}
           />
           <link
             rel="apple-touch-icon"
             sizes="167x167"
-            href="/apple-icon-167.png"
+            href={withBasePath('/apple-icon-167.png')}
           />
           <link
             rel="apple-touch-icon"
             sizes="152x152"
-            href="/apple-icon-152.png"
+            href={withBasePath('/apple-icon-152.png')}
           />
           <link
             rel="apple-touch-icon"
             sizes="120x120"
-            href="/apple-icon-120.png"
+            href={withBasePath('/apple-icon-120.png')}
           />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2048-2732.png"
+            href={withBasePath('/apple-splash-2048-2732.png')}
             media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2732-2048.png"
+            href={withBasePath('/apple-splash-2732-2048.png')}
             media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1668-2388.png"
+            href={withBasePath('/apple-splash-1668-2388.png')}
             media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2388-1668.png"
+            href={withBasePath('/apple-splash-2388-1668.png')}
             media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1668-2224.png"
+            href={withBasePath('/apple-splash-1668-2224.png')}
             media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2224-1668.png"
+            href={withBasePath('/apple-splash-2224-1668.png')}
             media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1536-2048.png"
+            href={withBasePath('/apple-splash-1536-2048.png')}
             media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2048-1536.png"
+            href={withBasePath('/apple-splash-2048-1536.png')}
             media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1242-2688.png"
+            href={withBasePath('/apple-splash-1242-2688.png')}
             media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2688-1242.png"
+            href={withBasePath('/apple-splash-2688-1242.png')}
             media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1125-2436.png"
+            href={withBasePath('/apple-splash-1125-2436.png')}
             media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2436-1125.png"
+            href={withBasePath('/apple-splash-2436-1125.png')}
             media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-828-1792.png"
+            href={withBasePath('/apple-splash-828-1792.png')}
             media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1792-828.png"
+            href={withBasePath('/apple-splash-1792-828.png')}
             media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1242-2208.png"
+            href={withBasePath('/apple-splash-1242-2208.png')}
             media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-2208-1242.png"
+            href={withBasePath('/apple-splash-2208-1242.png')}
             media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-750-1334.png"
+            href={withBasePath('/apple-splash-750-1334.png')}
             media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1334-750.png"
+            href={withBasePath('/apple-splash-1334-750.png')}
             media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-640-1136.png"
+            href={withBasePath('/apple-splash-640-1136.png')}
             media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           />
           <link
             rel="apple-touch-startup-image"
-            href="/apple-splash-1136-640.png"
+            href={withBasePath('/apple-splash-1136-640.png')}
             media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
           />
           <script

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { AuthContextValue } from '../components/AuthContext.js';
+import { withBasePath } from './basePath.js';
 import { ConstructorPageV } from './constructorPage.js';
 import { getAuth, getCollection, getDocRef } from './firebaseWrapper.js';
 import { getDisplayName } from './hooks.js';
@@ -165,7 +166,7 @@ export function useAuth(): AuthContextValue {
     async function getUserInfo() {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const res = await (
-        await fetch(`/api/userinfo/${user?.uid}`)
+        await fetch(withBasePath(`/api/userinfo/${user?.uid}`))
       )
         .json()
         .catch((e: unknown) => {

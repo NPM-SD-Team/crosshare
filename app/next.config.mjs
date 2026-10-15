@@ -1,7 +1,11 @@
 import { withSentryConfig } from '@sentry/nextjs/config';
 
 const distDir = 'nextjs';
+// eslint-disable-next-line no-undef
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 const baseConfig = {
+  basePath,
   allowedDevOrigins: ['md.local'],
   output: 'standalone',
   reactStrictMode: true,
@@ -12,7 +16,7 @@ const baseConfig = {
     if (dev) {
       config.watchOptions = {
         poll: 1000,
-        aggregateTimeout: 300, 
+        aggregateTimeout: 300,
       };
     }
     return config;

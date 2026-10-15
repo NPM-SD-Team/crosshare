@@ -4,6 +4,7 @@ import { GetServerSideProps } from 'next/types';
 import { SyntheticEvent, useState } from 'react';
 import { ErrorPage } from '../components/ErrorPage.js';
 import { useSnackbar } from '../components/Snackbar.js';
+import { withBasePath } from '../lib/basePath.js';
 import { getAddress } from '../lib/email.js';
 import { getCollection } from '../lib/firebaseAdminWrapper.js';
 import { PathReporter } from '../lib/pathReporter.js';
@@ -105,10 +106,13 @@ function Success(props: SuccessProps) {
     const fs = newUnsubs.length
       ? '&' + newUnsubs.map((n) => `f=${n}`).join('&')
       : '';
-    return fetch(`/api/subscription?u=${props.userId}&s=${props.sig}${fs}`, {
-      method: 'POST',
-      redirect: 'manual',
-    }).then(() => {
+    return fetch(
+      withBasePath(`/api/subscription?u=${props.userId}&s=${props.sig}${fs}`),
+      {
+        method: 'POST',
+        redirect: 'manual',
+      }
+    ).then(() => {
       setSubmitting(false);
     });
   }

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { type Root } from 'hast';
+import { withBasePath } from '../lib/basePath.js';
 import { clsx } from '../lib/utils.js';
 import { Markdown } from './Markdown.js';
 import styles from './SlateHeader.module.css';
@@ -14,12 +15,12 @@ export const SlateLogo = (props: { className?: string }) => {
   return (
     <div className={clsx(props.className, styles.logoWrap)}>
       <img
-        src={'/slate/Logo-Dark.png'}
+        src={withBasePath('/slate/Logo-Dark.png')}
         alt="Slate Crosswords"
         className={styles.logoDark}
       />
       <img
-        src={'/slate/Logo.png'}
+        src={withBasePath('/slate/Logo.png')}
         alt="Slate Crosswords"
         className={styles.logoLight}
       />

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
+import { withBasePath } from '../lib/basePath.js';
 import { ClueEntryT, ClueListT, parseClueList } from '../lib/ginsbergCommon.js';
 import { logAsyncErrors } from '../lib/utils.js';
 import { Overlay } from './Overlay.js';
@@ -56,7 +57,7 @@ export const SuggestOverlay = (props: SuggestOverlayProps) => {
     async function getClues() {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const res = await (
-        await fetch(`/api/clues/${props.word}`)
+        await fetch(withBasePath(`/api/clues/${props.word}`))
       )
         .json()
         .catch((e: unknown) => {

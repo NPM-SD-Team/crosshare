@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { withBasePath } from '../lib/basePath.js';
 import { logAsyncErrors } from '../lib/utils.js';
 import { AuthContext } from './AuthContext.js';
 import { Overlay } from './Overlay.js';
@@ -25,7 +26,9 @@ export const RevealOverlay = (props: RevealOverlayProps) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const res = await (
         await fetch(
-          `/api/reveal/${props.puzzleId}?displayName=${encodeURIComponent(props.displayName)}&token=${token}`,
+          withBasePath(
+            `/api/reveal/${props.puzzleId}?displayName=${encodeURIComponent(props.displayName)}&token=${token}`
+          ),
           {
             method: 'POST',
           }
