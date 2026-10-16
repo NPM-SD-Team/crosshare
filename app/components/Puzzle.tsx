@@ -1,6 +1,7 @@
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import useEventListener from '@use-it/event-listener';
+import { withBasePath } from '../lib/basePath.js';
 import type { User } from 'firebase/auth';
 import { updateDoc } from 'firebase/firestore';
 import { type Root } from 'hast';
@@ -25,7 +26,9 @@ import {
   FaComment,
   FaEdit,
   FaEye,
+  FaGamepad,
   FaGlasses,
+  FaHome,
   FaKeyboard,
   FaListOl,
   FaMoon,
@@ -150,6 +153,8 @@ import {
   TopBarDropDown,
   TopBarDropDownLink,
   TopBarDropDownLinkA,
+  TopBarDropDownLinkImage,
+  TopBarDropDownLinkSimpleA,
   TopBarLink,
   TopBarLinkA,
 } from './TopBar.js';
@@ -395,16 +400,16 @@ export const Puzzle = ({
   useEventListener('visibilitychange', autoPause);
 
   const [muted, setMuted] = usePersistedBoolean('muted', true);
-  const [color, setColorPref] = useDarkModeControl();
-  const isExistingDarkMode = useIsExistingDarkMode();
+  // const [color, setColorPref] = useDarkModeControl();
+  // const isExistingDarkMode = useIsExistingDarkMode();
 
-  const toggleColorPref = useCallback(() => {
-    if (color === null) {
-      setColorPref(isExistingDarkMode ? 'light' : 'dark');
-    } else {
-      setColorPref(color === 'dark' ? 'light' : 'dark');
-    }
-  }, [color, setColorPref, isExistingDarkMode]);
+  // const toggleColorPref = useCallback(() => {
+  //   if (color === null) {
+  //     setColorPref(isExistingDarkMode ? 'light' : 'dark');
+  //   } else {
+  //     setColorPref(color === 'dark' ? 'light' : 'dark');
+  //   }
+  // }, [color, setColorPref, isExistingDarkMode]);
 
   const [toggleKeyboard, setToggleKeyboard] = usePersistedBoolean(
     'keyboard',
@@ -1080,6 +1085,7 @@ export const Puzzle = ({
                   setToggleKeyboard(!toggleKeyboard);
                 }}
               />
+
               {mounted && props.isAdmin ? (
                 <>
                   <TopBarDropDownLink
@@ -1126,19 +1132,35 @@ export const Puzzle = ({
               ) : (
                 ''
               )}
+              {/*Exit stuff----------- */}
+              <div className={styles.navigationHeader}>{'Navigation'}</div>
+              <div className={styles.navigationResume}>
+                <Button
+                  onClick={() => {
+                    close();
+                  }}
+                  text={t`Resume`}
+                />
+              </div>
+              <TopBarDropDownLinkA
+                href={`/`}
+                icon={<FaHome />}
+                text="View All Crosswords"
+              />
+              <TopBarDropDownLinkA
+                href={`/`}
+                icon={<FaGamepad />}
+                text="Return To Games"
+              />
+              <TopBarDropDownLinkImage
+                src={withBasePath('/Logo.png')}
+                href={`/`}
+                text="Return To Nebraska Public Media Home"
+              />
               {isSlate ? (
                 ''
               ) : (
                 <>
-                  {!isEmbed ? (
-                    <TopBarDropDownLink
-                      icon={<FaMoon />}
-                      text={t`Toggle Light/Dark Mode`}
-                      onClick={() => {
-                        toggleColorPref();
-                      }}
-                    />
-                  ) : null}
                   {mounted && user !== undefined && !user.isAnonymous ? (
                     <>
                       <h2 className={styles.solverPreferencesHeader}>
@@ -1182,7 +1204,6 @@ export const Puzzle = ({
       setToggleKeyboard,
       isEmbed,
       isSlate,
-      toggleColorPref,
     ]
   );
 

@@ -130,6 +130,21 @@
   --dropdown-col-width: 220px; /* Explicit width so that child content of each button is aligned */
 }
 
+.navigationHeader {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem 0;
+  border-top: 1px solid var(--text-input-border);
+
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.navigationResume {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
 .topBarLeft,
 .topBarLeftControls,
 .topBarRight {

@@ -22,6 +22,7 @@ import {
   FaUserLock,
 } from 'react-icons/fa';
 import { IoMdCloseCircleOutline } from 'react-icons/io';
+import { withBasePath } from '../lib/basePath.js';
 import { getDocRef } from '../lib/firebaseWrapper.js';
 import { NotificationT } from '../lib/notificationTypes.js';
 import { ANIMATION_DELAY } from '../lib/style.js';
@@ -143,6 +144,39 @@ export const TopBarDropDownLink = (props: TopBarDropDownLinkProps) => {
     >
       <TopBarDropDownLinkContents {...props} />
     </button>
+  );
+};
+
+interface TopBarDropDownLinkImageProps extends Omit<
+  TopBarDropDownLinkCommonProps,
+  'icon'
+> {
+  src: string;
+  href: string;
+}
+export const TopBarDropDownLinkImage = (
+  props: TopBarDropDownLinkImageProps
+) => {
+  return (
+    <Link href={props.href} title={props.text} className={styles.dropdownLink}>
+      <TopBarDropDownLinkContents
+        {...props}
+        icon={
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={withBasePath(props.src)}
+            alt=""
+            aria-hidden="true"
+            style={{
+              width: '1em',
+              height: '1em',
+              objectFit: 'contain',
+              filter: 'brightness(0)',
+            }}
+          />
+        }
+      />
+    </Link>
   );
 };
 
