@@ -27,6 +27,7 @@ import { getMiniForDate, userIdToPage } from '../lib/serverOnly.js';
 import { withTranslation } from '../lib/translation.js';
 import { puzzleFromDB } from '../lib/types.js';
 import { PAGE_SIZE } from './featured/[pageNumber].js';
+// eslint-disable-next-line css-modules/no-unused-class
 import styles from './index.module.scss';
 
 type HomepagePuz = LinkablePuzzle & {
