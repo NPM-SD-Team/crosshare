@@ -36,7 +36,7 @@ import styles from './TopBar.module.scss';
 
 interface TopBarDropdownProps {
   onClose?: () => void;
-  text: string;
+  text?: string | undefined;
   icon: ReactNode;
   hoverText?: string;
   children: (close: () => void) => ReactNode;
@@ -59,7 +59,7 @@ export const TopBarDropDown = (props: TopBarDropdownProps) => {
         onClick={() => {
           setDropped(!dropped);
         }}
-        text={props.text}
+        text={props.text || undefined}
         icon={props.icon}
         hoverText={props.hoverText}
       />
@@ -109,7 +109,7 @@ export const NestedDropDown = (props: {
 
 interface TopBarDropDownLinkCommonProps {
   shortcutHint?: ReactNode;
-  text: string;
+  text?: string;
   icon: ReactNode;
 }
 const TopBarDropDownLinkContents = (props: TopBarDropDownLinkCommonProps) => {
@@ -264,7 +264,7 @@ export const TopBarLinkA = (props: TopBarLinkAProps) => {
     <Link
       data-disabled={props.disabled}
       href={props.href}
-      title={props.hoverText || props.text}
+      title={props.hoverText || props.text || undefined}
       className={styles.topBarLinkA}
       onClick={props.onClick}
     >
@@ -487,7 +487,6 @@ export const DefaultTopBar = ({
         ''
       )}
       <TopBarLinkA
-        key="account"
         disabled={accountSelected}
         href="/account"
         icon={<FaUser />}

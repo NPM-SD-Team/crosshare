@@ -183,7 +183,7 @@ export default function CrosshareApp({
         <meta
           key="og:image"
           property="og:image"
-          content="https://crosshare.org/apple-splash-1334-750.png"
+          content="https://labs.nebraskapublicmedia.org/crosswords/Logo.png"
         />
         <meta property="og:image:type" content="image/png" />
         <meta key="og:image:width" property="og:image:width" content="1334" />

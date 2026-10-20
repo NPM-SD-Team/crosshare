@@ -44,7 +44,12 @@ export default function TitleBar({
         className={styles.publishedDate}
         dateTime={publicationDate.toISOString()}
       >
-        {publicationDate.toLocaleDateString(undefined, { dateStyle: 'short' })}
+        {publicationDate.toLocaleDateString(undefined, {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })}
       </time>
     </header>
   );

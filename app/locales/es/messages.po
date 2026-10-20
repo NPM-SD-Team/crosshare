@@ -105,6 +105,11 @@ msgstr "Por {guestConstructor}"
 msgid "By {link}"
 msgstr "Por {link}"
 
+#. The variable is the name of the puzzle's constructor
+#: components/TitleBar.tsx
+msgid "By {link}"
+msgstr "Por {link}"
+
 #. The variable is the guest constructor's name
 #. The variable is the guest constructor's name
 #: components/PuzzleLink.tsx
@@ -380,7 +385,7 @@ msgstr "Newer unfinished solves"
 
 #: pages/newest/[[...pageNumber]].tsx
 msgid "Newest Puzzles"
-msgstr "Newest Puzzles"
+msgstr "Crucigramas más nuevos"
 
 #: components/FollowButton.tsx
 msgid "No longer following {constructorName}"
@@ -429,6 +434,10 @@ msgstr "Minis diarios anteriores "
 #: pages/index.tsx
 msgid "Previous featured puzzles"
 msgstr "Crucigramas destacados anteriores"
+
+#: pages/index.tsx
+msgid "Newest Puzzles"
+msgstr "Crucigramas Más Nuevas"
 
 #: components/Puzzle.tsx
 msgid "Print Puzzle"
@@ -529,11 +538,11 @@ msgstr "Estadísticas"
 
 #: pages/tags/[...path].tsx
 msgid "Tagged Puzzles"
-msgstr ""
+msgstr "Crucigramas de adjuntar"
 
 #: pages/tags/[...path].tsx
 msgid "The latest public puzzles tagged with {displayTags}"
-msgstr ""
+msgstr "Las crucigramas de mas nuevos adjuntó al {displayTags}"
 
 #: components/PuzzleOverlay.tsx
 msgid "This is a contest/meta puzzle. To submit your answer, first finish solving the grid (or reveal it if you get stuck or solved offline)."

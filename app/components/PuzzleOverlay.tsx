@@ -28,7 +28,9 @@ import styles from './PuzzleOverlay.module.css';
 import { ReactionButton } from './ReactionButton.js';
 import { SharingButtons } from './SharingButtons.js';
 import { PastDistanceToNow } from './TimeDisplay.js';
-
+import { TopBarDropDownLinkA, TopBarDropDownLinkImage } from './TopBar.js';
+import { FaGamepad, FaHome } from 'react-icons/fa';
+import { withBasePath } from '../lib/basePath.js';
 const PrevDailyMiniLink = ({ nextPuzzle }: { nextPuzzle?: NextPuzzleLink }) => {
   if (!nextPuzzle) {
     return <></>;
@@ -433,13 +435,20 @@ export const PuzzleOverlay = (props: SuccessOverlayProps | BeginPauseProps) => {
                 props.puzzle.title
               )}`}
             >
-              <Trans>Open on crosshare.org</Trans>
+              <Trans>Open on labs.nebraskapublicmedia.org/crosswords</Trans>
             </Link>
           </div>
         </>
       ) : (
         ''
       )}
+      <TopBarDropDownLinkA href={`/`} icon={<FaHome />} text="All Crosswords" />
+      <TopBarDropDownLinkA href={`/`} icon={<FaGamepad />} text="Games" />
+      <TopBarDropDownLinkImage
+        src={withBasePath('/Logo.png')}
+        href={`https://nebraskapublicmedia.org/`}
+        text="Nebraska Public Media Home"
+      />
     </Overlay>
   );
 };

@@ -31,7 +31,6 @@ import {
   FaHome,
   FaKeyboard,
   FaListOl,
-  FaMoon,
   FaPause,
   FaPencilAlt,
   FaPrint,
@@ -49,12 +48,7 @@ import {
   entryAndCrossAtPosition,
   entryIndexAtPosition,
 } from '../lib/gridBase.js';
-import {
-  useDarkModeControl,
-  useIsExistingDarkMode,
-  useMatchMedia,
-  usePersistedBoolean,
-} from '../lib/hooks.js';
+import { useMatchMedia, usePersistedBoolean } from '../lib/hooks.js';
 import { removeSpoilers } from '../lib/markdown/markdown.js';
 import { isNewPuzzleNotification } from '../lib/notificationTypes.js';
 import { cachePlay, isDirty, writePlayToDB } from '../lib/plays.js';
@@ -154,7 +148,6 @@ import {
   TopBarDropDownLink,
   TopBarDropDownLinkA,
   TopBarDropDownLinkImage,
-  TopBarDropDownLinkSimpleA,
   TopBarLink,
   TopBarLinkA,
 } from './TopBar.js';
@@ -1036,8 +1029,8 @@ export const Puzzle = ({
       <>
         <TopBarDropDown
           contentWidth={240}
+          //settings menu gear
           icon={isSlate ? <More /> : <FaCog />}
-          text={t` `}
         >
           {() => (
             <div className={styles.topBarPuzzleMoreDropdown}>
@@ -1145,17 +1138,17 @@ export const Puzzle = ({
               <TopBarDropDownLinkA
                 href={`/`}
                 icon={<FaHome />}
-                text="View All Crosswords"
+                text="All Crosswords"
               />
               <TopBarDropDownLinkA
                 href={`/`}
                 icon={<FaGamepad />}
-                text="Return To Games"
+                text="Games"
               />
               <TopBarDropDownLinkImage
                 src={withBasePath('/Logo.png')}
-                href={`/`}
-                text="Return To Nebraska Public Media Home"
+                href={`https://nebraskapublicmedia.org/`}
+                text="Nebraska Public Media Home"
               />
               {isSlate ? (
                 ''
@@ -1301,17 +1294,13 @@ export const Puzzle = ({
                       <div className={styles.topBarLeft}>
                         {moreMenu}
                         <div className={styles.topBarLeftControls}>
+                          {/*printing button, printer */}
                           <TopBarLinkA
                             href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
                             icon={<FaPrint />}
-                            text={t` `} //Print Puzzle
                           />
 
-                          <TopBarLinkA
-                            href="/account"
-                            icon={<FaUser />}
-                            text={t` `} //Account
-                          />
+                          <TopBarLinkA href="/account" icon={<FaUser />} />
                           <TopBarLink
                             icon={isSlate ? <Pause /> : <FaPause />}
                             hoverText={t`Pause Game`}
@@ -1370,7 +1359,6 @@ export const Puzzle = ({
                         />
                         <TopBarLink
                           icon={<Rebus />}
-                          text={t` `}
                           onClick={() => {
                             const kpa: KeypressAction = {
                               type: 'KEYPRESS',

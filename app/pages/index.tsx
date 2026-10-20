@@ -23,10 +23,7 @@ import { getCollection } from '../lib/firebaseAdminWrapper.js';
 import { markdownToHast } from '../lib/markdown/markdown.js';
 import { paginatedPuzzles } from '../lib/paginatedPuzzles.js';
 import { isUserPatron } from '../lib/patron.js';
-import {
-  getMiniForDate,
-  userIdToPage,
-} from '../lib/serverOnly.js';
+import { getMiniForDate, userIdToPage } from '../lib/serverOnly.js';
 import { withTranslation } from '../lib/translation.js';
 import { puzzleFromDB } from '../lib/types.js';
 import { PAGE_SIZE } from './featured/[pageNumber].js';
@@ -41,9 +38,7 @@ interface HomePageProps {
   dailymini: HomepagePuz | null;
   throwbackMini: HomepagePuz | null;
   newest: HomepagePuz[];
-  articles: ArticleT[];
   announcement: { title: string; body: Root } | null;
-  homepageText: Root | null;
 }
 
 const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
@@ -51,7 +46,6 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
   const todaysMini = await getMiniForDate(today);
   today.setUTCFullYear(today.getUTCFullYear() - 5);
   const throwback = await getMiniForDate(today);
-  
 
   const [announcement, homepageText]: [
     { title: string; body: Root } | null,
@@ -92,10 +86,7 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
     return i !== null;
   });
 
-  const [puzzlesWithoutConstructor] = await paginatedPuzzles(
-    0,
-    PAGE_SIZE
-  );
+  const [puzzlesWithoutConstructor] = await paginatedPuzzles(0, PAGE_SIZE);
   const newest = await Promise.all(
     puzzlesWithoutConstructor.map(async (p) => ({
       ...p,
@@ -246,7 +237,6 @@ export default function HomePage({
           />
         ))}
         <hr className="margin2em0" />
-        
       </div>
     </>
   );
