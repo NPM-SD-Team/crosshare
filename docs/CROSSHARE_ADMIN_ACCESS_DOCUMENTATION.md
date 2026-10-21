@@ -61,7 +61,12 @@ user that already exists there.
 
 **A deployed Firebase project** — ensure the production Firebase configuration
 is present and Application Default Credentials are configured for an identity
-authorized to administer that project's Firebase Authentication. Then run:
+authorized to administer that project's Firebase Authentication. 
+```sh
+gcloud auth application-default login
+```
+
+Follow the login process, then run:
 
 ```sh
 npx tsx scripts/makeAdmin.ts person@example.com
