@@ -475,7 +475,7 @@ export const DefaultTopBar = ({
       ) : (
         ''
       )}
-      {ctxt.user?.email ? (
+      {ctxt.isAdmin ? (
         <TopBarLinkA
           key="dashboard"
           disabled={dashboardSelected}

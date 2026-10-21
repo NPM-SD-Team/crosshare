@@ -1,7 +1,11 @@
 import { orderBy, query, where } from 'firebase/firestore';
 import Head from 'next/head';
 import { useCallback, useMemo } from 'react';
-import { AuthProps, requiresAuth } from '../components/AuthHelpers.js';
+import {
+  AuthProps,
+  requiresAdmin,
+  //requiresAuth,
+} from '../components/AuthHelpers.js';
 import { ButtonAsLink } from '../components/Buttons.js';
 import { CreatePageForm } from '../components/ConstructorPage.js';
 import { ConstructorStats } from '../components/ConstructorStats.js';
@@ -121,4 +125,5 @@ export const DashboardPage = ({ user, constructorPage }: AuthProps) => {
   );
 };
 
-export default requiresAuth(DashboardPage);
+//changed to require admin instead of just auth, since we want only admins to upload puzzles
+export default requiresAdmin(DashboardPage);
