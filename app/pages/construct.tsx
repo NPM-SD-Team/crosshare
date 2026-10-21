@@ -1,7 +1,6 @@
 import { ConstructOrUploadPage } from '../components/ConstructOrUploadPage.js';
 import { withStaticTranslation } from '../lib/translation.js';
 import {
-  AuthProps,
   requiresAdmin,
   //requiresAuth,
 } from '../components/AuthHelpers.js';
