@@ -37,7 +37,7 @@ const PrevDailyMiniLink = ({ nextPuzzle }: { nextPuzzle?: NextPuzzleLink }) => {
   }
   return (
     <Link
-      href={`/crosswords/${nextPuzzle.puzzleId}/${slugify(
+      href={`/puzzles/${nextPuzzle.puzzleId}/${slugify(
         nextPuzzle.puzzleTitle
       )}`}
     >
@@ -300,7 +300,7 @@ export const PuzzleOverlay = (props: SuccessOverlayProps | BeginPauseProps) => {
                           .trim()
                       )
                       .replace('{time}', timeString(props.solveTime, false))}
-                    path={`/crosswords/${props.puzzle.id}/${slugify(
+                    path={`/puzzles/${props.puzzle.id}/${slugify(
                       props.puzzle.title
                     )}`}
                   />
@@ -431,7 +431,7 @@ export const PuzzleOverlay = (props: SuccessOverlayProps | BeginPauseProps) => {
             </Link>
             {' · '}
             <Link
-              href={`/crosswords/${props.puzzle.id}/${slugify(
+              href={`/puzzles/${props.puzzle.id}/${slugify(
                 props.puzzle.title
               )}`}
             >

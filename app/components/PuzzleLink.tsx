@@ -79,7 +79,7 @@ const PuzzleLink = (props: {
       ? `/embed/${props.id}/${props.authorId}?backToListPage=${
           props.fromEmbedPage
         }${props.addQueryString ? '&' + props.addQueryString : ''}`
-      : `/crosswords/${props.id}/${slugify(props.puzzleTitle)}`;
+      : `/puzzles/${props.id}/${slugify(props.puzzleTitle)}`;
 
   const completed = authored || play?.f;
   const started = Boolean(play && play.t !== 0);

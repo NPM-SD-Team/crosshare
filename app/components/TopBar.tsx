@@ -398,7 +398,7 @@ const NotificationLink = ({
       link = (
         <Link
           className={styles.notificationLinkInner}
-          href={`/crosswords/${n.p}/${slugify(n.pn)}`}
+          href={`/puzzles/${n.p}/${slugify(n.pn)}`}
         >
           <FaComment className="marginRight0-5em" /> {n.cn} commented on{' '}
           <u>{n.pn}</u>
@@ -409,7 +409,7 @@ const NotificationLink = ({
       link = (
         <Link
           className={styles.notificationLinkInner}
-          href={`/crosswords/${n.p}/${slugify(n.pn)}`}
+          href={`/puzzles/${n.p}/${slugify(n.pn)}`}
         >
           <FaComments className="marginRight0-5em" /> {n.cn} replied to your
           comment on <u>{n.pn}</u>
@@ -420,7 +420,7 @@ const NotificationLink = ({
       link = (
         <Link
           className={styles.notificationLinkInner}
-          href={`/crosswords/${n.p}/${slugify(n.pn)}`}
+          href={`/puzzles/${n.p}/${slugify(n.pn)}`}
         >
           <FaRegNewspaper className="marginRight0-5em" /> {n.an} published a new
           puzzle: <u>{n.pn}</u>
@@ -431,7 +431,7 @@ const NotificationLink = ({
       link = (
         <Link
           className={styles.notificationLinkInner}
-          href={`/crosswords/${n.p}/${slugify(n.pn)}`}
+          href={`/puzzles/${n.p}/${slugify(n.pn)}`}
         >
           <FaRegGrinStars className="marginRight0-5em" /> Crosshare is featuring
           your puzzle <u>{n.pn}</u>

@@ -24,7 +24,7 @@ const baseConfig = {
   i18n: {
     locales: ['en', 'es', 'it', 'fr', 'id', 'pseudo'],
     defaultLocale: 'en',
-    localDetection: false,
+    localeDetection: false,
   },
   turbopack: {
     rules: {

@@ -118,7 +118,7 @@ const PuzzleListItem = (props: PuzzleResult & { crypticMods: string[] }) => {
     : new Date(props.publishTime);
   return (
     <li key={props.id} className="marginBottom2em">
-      <Link href={`/crosswords/${props.id}/${slugify(props.title)}`}>
+      <Link href={`/puzzles/${props.id}/${slugify(props.title)}`}>
         {props.title}
       </Link>{' '}
       by {props.authorName} - <PastDistanceToNow date={publishDate} />
@@ -277,7 +277,7 @@ export default requiresAdmin(() => {
 
   const goToPuzzle = useCallback((_date: Date, puzzle: string | null) => {
     if (puzzle) {
-      void NextJSRouter.push('/crosswords/' + puzzle);
+      void NextJSRouter.push('/puzzles/' + puzzle);
     }
   }, []);
 
@@ -318,8 +318,7 @@ export default requiresAdmin(() => {
                   </div>
                   <div>Notes: {rc.n}</div>
                   <div>
-                    <Link href={`/crosswords/${rc.pid}`}>puzzle</Link> -{' '}
-                    {rc.pid}
+                    <Link href={`/puzzles/${rc.pid}`}>puzzle</Link> - {rc.pid}
                   </div>
                   <button
                     disabled={rc.d || !rc.ca}
@@ -385,7 +384,7 @@ export default requiresAdmin(() => {
         ) : (
           commentsForModeration.map((cfm) => (
             <div key={cfm.i}>
-              <Link href={`/crosswords/${cfm.pid}`}>puzzle</Link> {cfm.n}:
+              <Link href={`/puzzles/${cfm.pid}`}>puzzle</Link> {cfm.n}:
               <Markdown hast={markdownToHast({ text: cfm.c })} />
               <button
                 className="marginRight2em marginTop1em"
@@ -472,7 +471,7 @@ export default requiresAdmin(() => {
                 .map(([crosswordId, count]) => {
                   return (
                     <li key={crosswordId}>
-                      <Link href={`/crosswords/${crosswordId}`}>
+                      <Link href={`/puzzles/${crosswordId}`}>
                         {titleForId(stats, crosswordId)}
                       </Link>
                       : {count}(

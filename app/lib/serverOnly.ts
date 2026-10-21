@@ -554,7 +554,7 @@ export const getPuzzlePageProps: GetServerSideProps<PuzzlePageProps> = async ({
       redirect: {
         destination: `/${
           locale && locale !== 'en' ? locale + '/' : ''
-        }crosswords/${puzzle.id}/${correctSlug}`,
+        }puzzles/${puzzle.id}/${correctSlug}`,
         permanent: true,
       },
     };

@@ -1231,7 +1231,7 @@ export const Puzzle = ({
             <title>{`${puzzle.title} | Crosshare crossword puzzle`}</title>
             <I18nTags
               locale={locale}
-              canonicalPath={`/crosswords/${puzzle.id}/${slugify(puzzle.title)}`}
+              canonicalPath={`/puzzles/${puzzle.id}/${slugify(puzzle.title)}`}
             />
             <meta key="og:title" property="og:title" content={puzzle.title} />
             <meta

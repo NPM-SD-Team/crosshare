@@ -47,7 +47,7 @@ export function PublishOverlay(props: {
           localStorage.removeItem(STORAGE_KEY);
           setDone(true);
           await NextJSRouter.push(
-            `/crosswords/${props.id}/${slugify(toPublish.t)}`
+            `/puzzles/${props.id}/${slugify(toPublish.t)}`
           );
         })
         .catch((e: unknown) => {
