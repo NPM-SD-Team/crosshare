@@ -29,6 +29,11 @@ import { FeatureList, FeatureListItem } from './FeatureList.js';
 import { Hero } from './Hero.js';
 import { Link, LinkButton } from './Link.js';
 
+/** CONSTRUCTOR OR UPLOAD PAGE OVERVIEW
+ *  This component returns the necessary html for the constructor or upload page based on a boolean value.
+ *  This is returned to the upload.tsx and construct.tsx pages which are then exported to the app.
+ */
+
 export function ConstructOrUploadPage({ isUpload }: { isUpload: boolean }) {
   const [dbReady, dbError, dbLoading, setDbLoaded] = useWordDB();
   const [showBuilder, setShowBuilder] = useState(false);
