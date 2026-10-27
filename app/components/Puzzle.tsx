@@ -1,7 +1,6 @@
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import useEventListener from '@use-it/event-listener';
-import { withBasePath } from '../lib/basePath.js';
 import type { User } from 'firebase/auth';
 import { updateDoc } from 'firebase/firestore';
 import { type Root } from 'hast';
@@ -152,7 +151,6 @@ import {
   TopBarLinkA,
 } from './TopBar.js';
 import TitleBar from './TitleBar.js';
-import puz from '../pages/api/puz/[puzzleId].js';
 
 const ModeratingOverlay = dynamic(
   () => import('./ModerateOverlay').then((mod) => mod.ModeratingOverlay),
