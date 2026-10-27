@@ -383,7 +383,7 @@ const test = command({
   },
 });
 
-const cmd = subcommands({
+export const cmd = subcommands({
   name: 'weeklyEmail',
   cmds: { generate, test, send },
 });

@@ -279,6 +279,22 @@ msgstr "Ingresar tu respuesta"
 msgid "Featured Puzzles"
 msgstr "Crucigramas destacados"
 
+#: pages/index.tsx
+msgid "Newest Puzzles"
+msgstr "Crucigramas más nuevos"
+
+#: pages/index.tsx
+msgid "Today's Puzzle"
+msgstr "Crucigrama de hoy"
+
+#. -------------------------------ACCOUNT PAGE
+#: pages/account.tsx
+msgid "Account"
+msgstr "Cuenta"
+
+
+
+
 #: pages/featured/[pageNumber].tsx
 msgid "Featured Puzzles | Page {currentPageNumber} | Crosshare"
 msgstr "Crucigramas destacados | Página {currentPageNumber} | Crosshare"
@@ -435,9 +451,6 @@ msgstr "Minis diarios anteriores "
 msgid "Previous featured puzzles"
 msgstr "Crucigramas destacados anteriores"
 
-#: pages/index.tsx
-msgid "Newest Puzzles"
-msgstr "Crucigramas Más Nuevas"
 
 #: components/Puzzle.tsx
 msgid "Print Puzzle"

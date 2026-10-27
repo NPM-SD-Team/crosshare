@@ -82,7 +82,7 @@ export default function WeeklyEmails(props: YearsEmailProps) {
   return (
     <>
       <Head>
-        <title>{'Weekly emails | Crosshare'}</title>
+        <title>{'Weekly emails | NPM'}</title>
         <meta name="robots" content="noindex" />
       </Head>
       <DefaultTopBar />

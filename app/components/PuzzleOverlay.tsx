@@ -312,6 +312,13 @@ export const PuzzleOverlay = (props: SuccessOverlayProps | BeginPauseProps) => {
           </>
         )}
       </div>
+      <TopBarDropDownLinkA href={`/`} icon={<FaHome />} text="All Crosswords" />
+      <TopBarDropDownLinkA href={`/`} icon={<FaGamepad />} text="Games" />
+      <TopBarDropDownLinkImage
+        src={withBasePath('/Logo.png')}
+        href={`https://nebraskapublicmedia.org/`}
+        text="Nebraska Public Media Home"
+      />
       {props.overlayType === OverlayType.Success && props.puzzle.isContest ? (
         <MetaSubmission
           hasPrize={!!props.contestHasPrize}
@@ -374,6 +381,7 @@ export const PuzzleOverlay = (props: SuccessOverlayProps | BeginPauseProps) => {
         ) : (
           ''
         )}
+
         {props.puzzle.commentsDisabled ? (
           isEmbed ? (
             ''
@@ -442,13 +450,6 @@ export const PuzzleOverlay = (props: SuccessOverlayProps | BeginPauseProps) => {
       ) : (
         ''
       )}
-      <TopBarDropDownLinkA href={`/`} icon={<FaHome />} text="All Crosswords" />
-      <TopBarDropDownLinkA href={`/`} icon={<FaGamepad />} text="Games" />
-      <TopBarDropDownLinkImage
-        src={withBasePath('/Logo.png')}
-        href={`https://nebraskapublicmedia.org/`}
-        text="Nebraska Public Media Home"
-      />
     </Overlay>
   );
 };

@@ -86,6 +86,7 @@ catalog:
   micromark-util-types: ^2.0.2
   mockdate: ^3.0.5
   next: 16.3.4
+  nodemailer: ^10.1.0
   prettier: ^3.9.6
   prop-types: ^15.8.1
   react: 19.2.8

@@ -15,6 +15,7 @@ import React, {
   SyntheticEvent,
   useCallback,
   useEffect,
+  useContext,
   useRef,
   useState,
 } from 'react';
@@ -22,6 +23,7 @@ import {
   useCollectionData,
   useDocumentDataOnce,
 } from 'react-firebase-hooks/firestore';
+import { AuthContext } from '../components/AuthContext.js';
 import { requiresAdmin } from '../components/AuthHelpers.js';
 import { Button } from '../components/Buttons.js';
 import { ConstructorNotes } from '../components/ConstructorNotes.js';
@@ -34,6 +36,7 @@ import { PastDistanceToNow } from '../components/TimeDisplay.js';
 import { DefaultTopBar } from '../components/TopBar.js';
 import { UpcomingMinisCalendar } from '../components/UpcomingMinisCalendar.js';
 import { ConstructorPageWithIdV } from '../lib/constructorPage.js';
+import { withBasePath } from '../lib/basePath.js';
 import { getFromSessionOrDB } from '../lib/dbUtils.js';
 import {
   AdminSettingsV,
@@ -193,6 +196,8 @@ const PuzzleListItem = (props: PuzzleResult & { crypticMods: string[] }) => {
 const MODERATION_OFFSET = 1000 * 60 * 60 * 8;
 
 export default requiresAdmin(() => {
+  const { user } = useContext(AuthContext);
+  const [sendingTestEmail, setSendingTestEmail] = useState(false);
   const [donationEmail, setDonationEmail] = useState('');
   const [donationAmount, setDonationAmount] = useState('');
   const [donationReceivedAmount, setDonationReceivedAmount] = useState('');
@@ -201,6 +206,33 @@ export default requiresAdmin(() => {
   const [donationUserId, setDonationUserId] = useState('');
   const [newHomepageText, setNewHomepageText] = useState<string>('');
   const { showSnackbar } = useSnackbar();
+
+  async function sendTestEmail() {
+    if (!user) {
+      showSnackbar('You must be signed in to send a test email');
+      return;
+    }
+
+    setSendingTestEmail(true);
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(withBasePath('/api/admin/test-email'), {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Test email request failed (${response.status})`);
+      }
+      showSnackbar(`Test email sent to ${user.email ?? 'your account'}`);
+    } catch (error) {
+      console.error('Failed to send test email', error);
+      showSnackbar('Failed to send test email');
+    } finally {
+      setSendingTestEmail(false);
+    }
+  }
 
   const puzzleCollection = useRef(
     query(
@@ -651,6 +683,14 @@ export default requiresAdmin(() => {
         >
           Test Sentry Error
         </button>
+
+        <Button
+          disabled={sendingTestEmail}
+          onClick={() => void sendTestEmail()}
+          text={
+            sendingTestEmail ? 'Sending test email...' : 'Test Sending emails'
+          }
+        />
       </div>
     </>
   );

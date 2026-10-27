@@ -1,10 +1,10 @@
-import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
-import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { toHtml } from 'hast-util-to-html';
 import { getUser } from './firebaseAdminWrapper.js';
 import { markdownToHast } from './markdown/markdown.js';
 import { UnsubscribeFlags } from './prefs.js';
 import { getSig } from './subscriptions.js';
+import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 
 export async function getAddress(userId: string): Promise<string | undefined> {
   try {
@@ -17,32 +17,31 @@ export async function getAddress(userId: string): Promise<string | undefined> {
   }
 }
 
-const REGION = 'us-east-1';
+export type EmailClient = Transporter;
 
 export async function getClient() {
-  const secretmanagerClient = new SecretManagerServiceClient();
-  const [secretVersion] = await secretmanagerClient.accessSecretVersion({
-    name: 'projects/603173482014/secrets/ses-key/versions/latest',
-  });
-  const [accessKeyId, secretAccessKey] = (
-    secretVersion.payload?.data?.toString() ?? ''
-  ).split(' ');
-  if (!accessKeyId || !secretAccessKey) {
-    throw new Error('Failed to load ses keys');
+  const { SMTP_HOST, SMTP_PORT } = process.env;
+
+  if (!SMTP_HOST || !SMTP_PORT) {
+    throw new Error('SMTP_HOST, SMTP_PORT must be configured');
   }
 
-  return new SESv2Client({
-    region: REGION,
-    credentials: { accessKeyId, secretAccessKey },
+  const port = Number(SMTP_PORT);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('SMTP_PORT must be a valid port number');
+  }
+
+  return nodemailer.createTransport({
+    host: SMTP_HOST,
+    port,
+    secure: process.env.SMTP_SECURE == 'true',
   });
 }
-
-export type EmailClient = SESv2Client;
 
 export const RATE_LIMIT = 13;
 
 export const emailLink = (campaign: string, linkTo: string) =>
-  `https://crosshare.org/${linkTo}#utm_source=crosshare&utm_medium=email&utm_campaign=${campaign}`;
+  `https://labs.nebraskapublicmedia.org/crosswords/${linkTo}#utm_source=crosshare&utm_medium=email&utm_campaign=${campaign}`;
 
 const tagsToReplace: Record<string, string> = {
   '&': '&amp;',
@@ -91,17 +90,12 @@ export async function sendEmail({
       footerText ? '. ' + footerText : ''
     }`;
 
-  const message = new SendEmailCommand({
-    Destination: { ToAddresses: [toAddress] },
-    Content: {
-      Simple: {
-        Body: {
-          Html: {
-            Data: `<!DOCTYPE html>
+  function buildHtmlBody(subject: string, markdown: string) {
+    return `<!DOCTYPE html>
           <html>
           <head>
           <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
-          <title>${safeForHtml(subject || 'Crosshare Notifications')}</title>
+          <title>${safeForHtml(subject || 'NPM crosswords Notifications')}</title>
           </head>
           <body>
           ${toHtml(
@@ -111,25 +105,22 @@ export async function sendEmail({
             })
           )}
           </body>
-          </html>`,
-          },
-          Text: { Data: markdown },
-        },
-        Subject: { Data: subject },
-        Headers: [
-          {
-            Name: 'List-Unsubscribe',
-            Value: `<https://crosshare.org/api/subscription?u=${userId}&s=${sig}&f=${oneClickUnsubscribeTag}>`,
-          },
-          {
-            Name: 'List-Unsubscribe-Post',
-            Value: 'List-Unsubscribe=One-Click',
-          },
-        ],
-      },
-    },
-    FromEmailAddress: 'Mike from Crosshare <mike@crosshare.org>',
-  });
+          </html>`;
+  }
 
-  return client.send(message);
+  const htmlBody = {
+    Data: buildHtmlBody(subject, markdown),
+  };
+
+  return client.sendMail({
+    from: 'Nebraska Public Media Labs <labs@nebraskapublicmedia.org>',
+    to: toAddress,
+    subject,
+    text: markdown,
+    html: htmlBody.Data,
+    headers: {
+      'List-Unsubscribe': `<https://labs.nebraskapublicmedia.org/crosswords/api/subscription?u=${userId}&s=${sig}&f=${oneClickUnsubscribeTag}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
+  });
 }

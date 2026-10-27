@@ -1034,6 +1034,59 @@ export const Puzzle = ({
         >
           {() => (
             <div className={styles.topBarPuzzleMoreDropdown}>
+              {isSlate ? (
+                ''
+              ) : (
+                <>
+                  {mounted && user !== undefined && !user.isAnonymous ? (
+                    <>
+                      <h2 className={styles.solverPreferencesHeader}>
+                        {t`Solver Preferences`}
+                      </h2>
+                      <ul
+                        className={styles.solverPrefList}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        role="presentation"
+                      >
+                        <SolverPreferencesList
+                          prefs={props.prefs}
+                          userId={user.uid}
+                        />
+                      </ul>
+                    </>
+                  ) : (
+                    ''
+                  )}
+                </>
+              )}
+              {/*Exit stuff----------- */}
+              <div className={styles.navigationHeader}>{'Navigation'}</div>
+              <div className={styles.navigationResume}>
+                <Button
+                  onClick={() => {
+                    close();
+                  }}
+                  text={t`Resume`}
+                />
+              </div>
+              <TopBarDropDownLinkA
+                href={`/`}
+                icon={<FaHome />}
+                text="All Crosswords"
+              />
+              <TopBarDropDownLinkA
+                href={`/`}
+                icon={<FaGamepad />}
+                text="Games"
+              />
+              <TopBarDropDownLinkImage
+                src={withBasePath('/Logo.png')}
+                href={`https://nebraskapublicmedia.org/`}
+                text="Nebraska Public Media Home"
+              />
+
               {!state.success ? (
                 <>
                   <TopBarDropDownLink
@@ -1124,58 +1177,6 @@ export const Puzzle = ({
                 </>
               ) : (
                 ''
-              )}
-              {/*Exit stuff----------- */}
-              <div className={styles.navigationHeader}>{'Navigation'}</div>
-              <div className={styles.navigationResume}>
-                <Button
-                  onClick={() => {
-                    close();
-                  }}
-                  text={t`Resume`}
-                />
-              </div>
-              <TopBarDropDownLinkA
-                href={`/`}
-                icon={<FaHome />}
-                text="All Crosswords"
-              />
-              <TopBarDropDownLinkA
-                href={`/`}
-                icon={<FaGamepad />}
-                text="Games"
-              />
-              <TopBarDropDownLinkImage
-                src={withBasePath('/Logo.png')}
-                href={`https://nebraskapublicmedia.org/`}
-                text="Nebraska Public Media Home"
-              />
-              {isSlate ? (
-                ''
-              ) : (
-                <>
-                  {mounted && user !== undefined && !user.isAnonymous ? (
-                    <>
-                      <h2 className={styles.solverPreferencesHeader}>
-                        {t`Solver Preferences`}
-                      </h2>
-                      <ul
-                        className={styles.solverPrefList}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        role="presentation"
-                      >
-                        <SolverPreferencesList
-                          prefs={props.prefs}
-                          userId={user.uid}
-                        />
-                      </ul>
-                    </>
-                  ) : (
-                    ''
-                  )}
-                </>
               )}
             </div>
           )}

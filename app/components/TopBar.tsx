@@ -492,6 +492,10 @@ export const DefaultTopBar = ({
         icon={<FaUser />}
         text={t`Account`}
       />
+      <div className={styles.titleCard}>
+        <h1>Crosswords</h1>
+        <p>beta</p>
+      </div>
     </TopBar>
   );
 };

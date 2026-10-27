@@ -53,7 +53,7 @@ export function UnfinishedPuzzleList({ user }: { user: User | undefined }) {
           <PuzzleResultLink
             key={puzzle.id}
             puzzle={{ ...puzzle, blogPostPreview: null }}
-            showAuthor={false}
+            showAuthor={true}
             constructorPage={null}
             constructorIsPatron={false}
             filterTags={[]}

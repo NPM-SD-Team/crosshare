@@ -76,6 +76,7 @@
     "micromark-util-resolve-all": "catalog:",
     "micromark-util-types": "catalog:",
     "next": "catalog:",
+    "nodemailer": "catalog:",
     "prop-types": "catalog:",
     "react": "catalog:",
     "react-csv": "catalog:",
