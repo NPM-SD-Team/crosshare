@@ -208,8 +208,8 @@ export default requiresAdmin(() => {
   const { showSnackbar } = useSnackbar();
 
   async function sendTestEmail() {
+    //should never occur since you can't get to this page otherwise but you have to check for eslint
     if (!user) {
-      showSnackbar('You must be signed in to send a test email');
       return;
     }
 
@@ -223,12 +223,24 @@ export default requiresAdmin(() => {
         },
       });
       if (!response.ok) {
-        throw new Error(`Test email request failed (${response.status})`);
+        const result: unknown = await response.json().catch(() => undefined);
+        const message =
+          typeof result === 'object' &&
+          result !== null &&
+          'message' in result &&
+          typeof result.message === 'string'
+            ? result.message
+            : `Test email request failed (${response.status})`;
+        throw new Error(message);
       }
       showSnackbar(`Test email sent to ${user.email ?? 'your account'}`);
     } catch (error) {
       console.error('Failed to send test email', error);
-      showSnackbar('Failed to send test email');
+      showSnackbar(
+        error instanceof Error
+          ? `Failed to send test email: ${error.message}`
+          : 'Failed to send test email'
+      );
     } finally {
       setSendingTestEmail(false);
     }
@@ -333,7 +345,7 @@ export default requiresAdmin(() => {
   return (
     <>
       <Head>
-        <title>{`Admin | Crosshare`}</title>
+        <title>{`Admin | NPM Games`}</title>
         <meta name="robots" content="noindex" />
       </Head>
       <DefaultTopBar />

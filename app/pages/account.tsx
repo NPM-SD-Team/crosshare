@@ -111,7 +111,7 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
   return (
     <>
       <Head>
-        <title>{`Account | Crosshare`}</title>
+        <title>{`Account | NPM Games`}</title>
         <meta name="robots" content="noindex" />
       </Head>
       <DefaultTopBar accountSelected />
@@ -203,7 +203,7 @@ export const AccountPage = ({ user, constructorPage, prefs }: AuthProps) => {
             ) : (
               <p>
                 Start sharing your own puzzles by creating one with the{' '}
-                <Link href="/construct">Crosshare constructor</Link> or{' '}
+                <Link href="/construct">NPM Games constructor</Link> or{' '}
                 <Link href="/upload">uploading a .puz or .ipuz file.</Link>
               </p>
             )}

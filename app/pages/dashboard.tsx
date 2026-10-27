@@ -49,7 +49,7 @@ export const DashboardPage = ({ user, constructorPage }: AuthProps) => {
   return (
     <>
       <Head>
-        <title>{`Constructor Dashboard | Crosshare`}</title>
+        <title>{`Constructor Dashboard | NPM Games`}</title>
         <meta name="robots" content="noindex" />
       </Head>
       <DefaultTopBar dashboardSelected />

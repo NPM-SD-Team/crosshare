@@ -10,6 +10,7 @@ import { I18nTags } from '../components/I18nTags.js';
 import { Markdown } from '../components/Markdown.js';
 import { LinkablePuzzle, PuzzleResultLink } from '../components/PuzzleLink.js';
 import { DefaultTopBar } from '../components/TopBar.js';
+import ParentWebsiteHeader from '../components/ParentWebsiteHeader.js';
 import { UnfinishedPuzzleList } from '../components/UnfinishedPuzzleList.js';
 import { ArticleT, validate } from '../lib/article.js';
 import { ConstructorPageBarebones } from '../lib/constructorPage.js';
@@ -104,15 +105,17 @@ export default function HomePage({
   const { user } = useContext(AuthContext);
   //just the newsest puzzle out of the newest filtered list
   const todaysPuzzle = newest[0];
-  const title = t`Crosshare - Free Crossword Constructor and Daily Mini Crossword Puzzles`;
+  const title = t`NPM Games - Daily Crossword Puzzles`;
   return (
     <>
       <Head>
         <title>{title}</title>
         <I18nTags locale={router.locale || 'en'} canonicalPath="/" />
       </Head>
-
-      <DefaultTopBar />
+      <div style={{ position: 'sticky', top: '0', zIndex: '99' }}>
+        <DefaultTopBar />
+        <ParentWebsiteHeader />
+      </div>
 
       <div className="margin1em">
         {announcement ? (

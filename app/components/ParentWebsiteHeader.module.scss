@@ -1,0 +1,24 @@
+.headerLogo {
+  width: 360px;
+  height: auto;
+  display: block;
+}
+
+.siteHeaderPrimaryContainer {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: left;
+  transition: 0.2s ease-out;
+  padding: 5px 10px 6px;
+  background: #fff;
+  z-index: 1;
+  width: 100%;
+  top: 0;
+  left: 0;
+  box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.3);
+}
+
+.siteHeaderPrimaryLeft {
+  z-index: 99;
+}

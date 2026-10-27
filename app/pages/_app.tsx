@@ -171,7 +171,7 @@ export default function CrosshareApp({
         <meta
           key="og:description"
           property="og:description"
-          content="Crosshare is a community for crossword constructors and solvers. Each day we post a new mini crossword puzzle you can play for free."
+          content="Nebraska Public Media Posts daily crosswords for free. Play now!"
         />
         <meta
           name="viewport"

@@ -152,6 +152,7 @@ import {
   TopBarLinkA,
 } from './TopBar.js';
 import TitleBar from './TitleBar.js';
+import puz from '../pages/api/puz/[puzzleId].js';
 
 const ModeratingOverlay = dynamic(
   () => import('./ModerateOverlay').then((mod) => mod.ModeratingOverlay),
@@ -1082,7 +1083,7 @@ export const Puzzle = ({
                 text="Games"
               />
               <TopBarDropDownLinkImage
-                src={withBasePath('/Logo.png')}
+                src={'/Logo.png'}
                 href={`https://nebraskapublicmedia.org/`}
                 text="Nebraska Public Media Home"
               />
@@ -1276,7 +1277,11 @@ export const Puzzle = ({
               <TitleBar
                 title={puzzle.title}
                 publishedAt={new Date(puzzle.publishTime)}
-                author={puzzle.authorName}
+                author={
+                  puzzle.guestConstructor
+                    ? puzzle.guestConstructor
+                    : puzzle.authorName
+                }
               ></TitleBar>
               <TopBar title={puzzle.title}>
                 {!loadingPlayState ? (

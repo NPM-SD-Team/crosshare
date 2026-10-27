@@ -43,12 +43,23 @@ export default async function handler(
     await client.sendMail({
       from: 'Nebraska Public Media Labs <labs@nebraskapublicmedia.org>',
       to: claims.email,
-      subject: 'Crosshare SMTP test',
-      text: 'This is a test email from the Crosshare admin page.',
+      subject: 'NPM SMTP test',
+      text: 'This is a test email from the NPM Games admin page.',
     });
     res.status(200).json({ message: 'Test email sent' });
   } catch (error) {
     console.error('Failed to send admin test email', error);
-    res.status(500).json({ message: 'Failed to send test email' });
+    const code =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'string'
+        ? error.code
+        : undefined;
+    res.status(500).json({
+      message: code
+        ? `SMTP request failed (${code})`
+        : 'Failed to send test email',
+    });
   }
 }
