@@ -257,6 +257,7 @@ function getPuzzleState(): PuzzleState {
     bankedSeconds: 0,
     ranMetaSubmitEffects: false,
     currentTimeWindowStart: Date.now(),
+    settingsOpenCurrently: false,
     didCheat: false,
     clueView: false,
     cellsUpdatedAt: fromDB.grid.map(() => 0),

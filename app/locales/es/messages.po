@@ -292,8 +292,21 @@ msgstr "Crucigrama de hoy"
 msgid "Account"
 msgstr "Cuenta"
 
+#: pages/account.tsx
+msgid "You're logged in as {displayNameOrEmail}"
+msgstr "Sesión iniciada como {displayNameOrEmail}"
 
+#: pages/account.tsx
+msgid "Your display name - {displayName} - is displayed next to any comments you make or puzzles you create."
+msgstr ""
 
+#: pages/account.tsx
+msgid "Notification Settings"
+msgstr ""
+
+#: pages/account.tsx
+msgid "Email me (to {email}, at most once per day) when:"
+msgstr "Mandarme, no mas de uno vez de dia cuando"
 
 #: pages/featured/[pageNumber].tsx
 msgid "Featured Puzzles | Page {currentPageNumber} | Crosshare"

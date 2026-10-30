@@ -516,11 +516,7 @@ const CommentForm = ({
       <form onSubmit={logAsyncErrors(submitComment)}>
         <div className="marginBottom1em">
           <label className="width100 margin0">
-            {(props.replyToId !== undefined
-              ? t`Enter your reply`
-              : t`Leave a comment`) +
-              ' ' +
-              t`(please be nice!):`}
+            {(props.replyToId !== undefined ? t`Enter your reply` : ' ') + ' '}
             <LengthLimitedTextarea
               className="width100 displayBlock"
               maxLength={COMMENT_LENGTH_LIMIT}

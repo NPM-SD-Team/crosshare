@@ -160,10 +160,11 @@
   background-color: transparent;
 }
 
+//dark color for if its clicked on rn
 .topBarLinkA[data-disabled='true'] {
   pointer-events: none;
   cursor: default;
-  background-color: var(--bg);
+  background-color: #181c4f;
 }
 
 .topBarLinkA:hover,

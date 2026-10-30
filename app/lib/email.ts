@@ -20,6 +20,7 @@ export async function getAddress(userId: string): Promise<string | undefined> {
 export type EmailClient = Transporter;
 
 export async function getClient() {
+  // These settings come from the server environment, not from browser code.
   const { SMTP_HOST, SMTP_PORT } = process.env;
 
   if (!SMTP_HOST || !SMTP_PORT) {
@@ -33,8 +34,8 @@ export async function getClient() {
 
   return nodemailer.createTransport({
     host: SMTP_HOST,
-    port,
-    secure: process.env.SMTP_SECURE == 'true',
+    port: port,
+    // since no username or password is sent the SMTP relay must allow this server.
   });
 }
 
@@ -84,6 +85,7 @@ export async function sendEmail({
 
   const sig = await getSig(userId);
   const link = emailLink(campaign, `subscription?u=${userId}&s=${sig}`);
+  // Add a signed settings link so the recipient can manage email preferences.
   markdown =
     markdown.trim() +
     `\n\n\n\n---\n\nTo unsubscribe or manage your preferences [click here](${link})${
@@ -116,6 +118,7 @@ export async function sendEmail({
     from: 'Nebraska Public Media Labs <labs@nebraskapublicmedia.org>',
     to: toAddress,
     subject,
+    // Send both formats so the message works in HTML and text-only email apps.
     text: markdown,
     html: htmlBody.Data,
     headers: {

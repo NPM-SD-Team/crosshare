@@ -291,6 +291,7 @@ async function sendWeeklyEmail(test: boolean, from: string | undefined) {
   let numSent = 0;
   let promises: Promise<void>[] = [];
 
+  // This script needs the exported account list to map users to email addresses.
   return readFile('accounts.csv')
     .then(async (binary) => {
       const csv: string[][] = parse(binary, {
@@ -304,10 +305,12 @@ async function sendWeeklyEmail(test: boolean, from: string | undefined) {
           continue;
         }
         if (test) {
+          // Test mode sends only to the designated test account.
           if (uid !== 'fSEwJorvqOMK5UhNMHa4mu48izl1') {
             continue;
           }
         } else if (from) {
+          // Resume after this user when continuing a large send.
           if (from === uid) {
             sawUID = true;
             continue;
@@ -352,6 +355,7 @@ async function sendWeeklyEmail(test: boolean, from: string | undefined) {
           await Promise.all(promises);
           promises = [];
           const elapsed = Date.now() - start;
+          // Keep the send rate below the SMTP provider's limit.
           if (elapsed < 1000) {
             await new Promise((resolve) => setTimeout(resolve, 1000 - elapsed));
           }
@@ -388,4 +392,5 @@ export const cmd = subcommands({
   cmds: { generate, test, send },
 });
 
+// This is a command-line entry point; do not import this script into browser code.
 void run(cmd, process.argv.slice(2));

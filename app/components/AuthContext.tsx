@@ -2,7 +2,7 @@ import { User } from 'firebase/auth';
 import { createContext } from 'react';
 import { ConstructorPageT } from '../lib/constructorPage.js';
 import { NotificationT } from '../lib/notificationTypes.js';
-import { AccountPrefsT } from '../lib/prefs.js';
+import { AccountPrefsT, SolverPrefsT } from '../lib/prefs.js';
 
 export interface AuthContextValue {
   user?: User;
@@ -14,6 +14,7 @@ export interface AuthContextValue {
   error?: string;
   constructorPage?: ConstructorPageT;
   prefs?: AccountPrefsT;
+  updateGuestPrefs?: (prefs: SolverPrefsT) => void;
   displayName?: string | null;
   updateDisplayName?: (n: string) => Promise<void>;
 }

@@ -45,6 +45,7 @@ export interface PuzzleState extends GridInterfaceState {
   displaySeconds: number;
   bankedSeconds: number;
   currentTimeWindowStart: number;
+  settingsOpenCurrently: boolean;
   loadedPlayState: boolean;
   contestSubmission?: string;
   contestPriorSubmissions?: string[];
@@ -346,6 +347,12 @@ export function puzzleReducer(
       currentTimeWindowStart,
       dismissedKeepTrying: true,
     };
+  }
+  if (action.type === 'OPENEDSETTINGS') {
+    return { ...state, settingsOpenCurrently: true };
+  }
+  if (action.type === 'CLOSEDSETTINGS') {
+    return { ...state, settingsOpenCurrently: false };
   }
   if (action.type === 'DISMISSSUCCESS') {
     return { ...state, dismissedSuccess: true };

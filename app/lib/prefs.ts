@@ -9,15 +9,22 @@ export const UnsubscribeFlags = {
   weekly: null, // weekly email
 };
 
-const AccountPrefsFlagsV = t.partial({
+export const SolverPrefsV = t.partial({
   advanceOnPerpendicular: t.boolean,
   dontSkipCompleted: t.boolean,
   dontAdvanceWordAfterCompletion: t.boolean,
   solveDownsOnly: t.boolean,
-  disableCommentsByDefault: t.boolean,
   dontPauseOnLostFocus: t.boolean,
 });
+export type SolverPrefsT = t.TypeOf<typeof SolverPrefsV>;
+
+const AccountPrefsFlagsV = t.intersection([
+  SolverPrefsV,
+  t.partial({ disableCommentsByDefault: t.boolean }),
+]);
 export type AccountPrefsFlagsT = t.TypeOf<typeof AccountPrefsFlagsV>;
+
+export const GUEST_SOLVER_PREFS_STORAGE_KEY = 'guestSolverPrefs';
 
 export const AccountPrefsV = t.intersection([
   AccountPrefsFlagsV,

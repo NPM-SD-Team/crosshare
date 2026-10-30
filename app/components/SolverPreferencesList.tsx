@@ -1,15 +1,20 @@
 import { setDoc } from 'firebase/firestore';
 import { getDocRef } from '../lib/firebaseWrapper.js';
-import { AccountPrefsFlagsT, AccountPrefsT } from '../lib/prefs.js';
+import {
+  AccountPrefsFlagsT,
+  AccountPrefsT,
+  SolverPrefsT,
+} from '../lib/prefs.js';
 import { logAsyncErrors } from '../lib/utils.js';
 import { useSnackbar } from './Snackbar.js';
 
 interface PrefSettingProps {
   prefs: AccountPrefsT | undefined;
-  userId: string;
+  userId?: string;
   flag: keyof AccountPrefsFlagsT;
   text: string;
   invert?: boolean;
+  onGuestPrefsChange?: (prefs: SolverPrefsT) => void;
 }
 
 export const PrefSetting = (props: PrefSettingProps) => {
@@ -22,15 +27,25 @@ export const PrefSetting = (props: PrefSettingProps) => {
         type="checkbox"
         checked={props.invert ? !prefSet : prefSet}
         onChange={logAsyncErrors(async (e) => {
-          await setDoc(
-            getDocRef('prefs', props.userId),
-            {
-              [props.flag]: props.invert ? !e.target.checked : e.target.checked,
-            },
-            { merge: true }
-          ).then(() => {
+          const value = props.invert ? !e.target.checked : e.target.checked;
+          //this will send you to user saved prefences otherwise it will go to guest
+          if (props.userId) {
+            await setDoc(
+              getDocRef('prefs', props.userId),
+              { [props.flag]: value },
+              { merge: true }
+            );
             showSnackbar('Preferences Updated');
-          });
+            return;
+          }
+          //this would only run if you didn't set up the presetting compo right, has to be done
+          //for eslint reasons
+          if (!props.onGuestPrefsChange) {
+            throw new Error('didnt assign prefs change');
+          }
+          //send prefsChange with new props
+          props.onGuestPrefsChange({ ...props.prefs, [props.flag]: value });
+          showSnackbar('Preferences Updated');
         })}
         onClick={(e) => {
           e.stopPropagation();
@@ -44,9 +59,11 @@ export const PrefSetting = (props: PrefSettingProps) => {
 export const SolverPreferencesList = ({
   prefs,
   userId,
+  onGuestPrefsChange,
 }: {
   prefs?: AccountPrefsT;
-  userId: string;
+  userId?: string;
+  onGuestPrefsChange?: (prefs: SolverPrefsT) => void;
 }) => {
   return (
     <>
@@ -56,6 +73,7 @@ export const SolverPreferencesList = ({
           userId={userId}
           flag={'advanceOnPerpendicular'}
           text="Advance to next square when changing direction with arrow keys"
+          onGuestPrefsChange={onGuestPrefsChange}
         />
       </li>
       <li>
@@ -65,6 +83,7 @@ export const SolverPreferencesList = ({
           flag={'dontSkipCompleted'}
           invert={true}
           text="Skip over completed squares after entering a letter"
+          onGuestPrefsChange={onGuestPrefsChange}
         />
       </li>
       <li>
@@ -74,6 +93,7 @@ export const SolverPreferencesList = ({
           flag={'dontAdvanceWordAfterCompletion'}
           invert={true}
           text="Move to next clue after completing an entry"
+          onGuestPrefsChange={onGuestPrefsChange}
         />
       </li>
       <li>
@@ -82,6 +102,7 @@ export const SolverPreferencesList = ({
           userId={userId}
           flag={'solveDownsOnly'}
           text="Start puzzles in downs-only mode"
+          onGuestPrefsChange={onGuestPrefsChange}
         />
       </li>
       <li>
@@ -91,6 +112,7 @@ export const SolverPreferencesList = ({
           flag={'dontPauseOnLostFocus'}
           invert={true}
           text="Automatically pause solving when page loses focus"
+          onGuestPrefsChange={onGuestPrefsChange}
         />
       </li>
     </>

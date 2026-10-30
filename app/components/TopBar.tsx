@@ -36,9 +36,11 @@ import styles from './TopBar.module.scss';
 
 interface TopBarDropdownProps {
   onClose?: () => void;
+  onClick?: () => void;
   text?: string | undefined;
   icon: ReactNode;
   hoverText?: string;
+
   children: (close: () => void) => ReactNode;
   /**
    * The width of the inner button content in px; enables you to
@@ -58,6 +60,7 @@ export const TopBarDropDown = (props: TopBarDropdownProps) => {
       <TopBarLink
         onClick={() => {
           setDropped(!dropped);
+          props.onClick?.();
         }}
         text={props.text || undefined}
         icon={props.icon}

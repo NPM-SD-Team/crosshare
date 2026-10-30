@@ -11,7 +11,12 @@ import { getAuth, getCollection, getDocRef } from './firebaseWrapper.js';
 import { getDisplayName } from './hooks.js';
 import { NotificationT, NotificationV } from './notificationTypes.js';
 import { PathReporter } from './pathReporter.js';
-import { AccountPrefsV } from './prefs.js';
+import {
+  AccountPrefsV,
+  GUEST_SOLVER_PREFS_STORAGE_KEY,
+  SolverPrefsT,
+  SolverPrefsV,
+} from './prefs.js';
 import { parseUserInfo } from './userinfo.js';
 import { logAsyncErrors } from './utils.js';
 
@@ -21,6 +26,56 @@ const isRight = <A>(ma: Either<unknown, A>): ma is Right<A> =>
 export function useAuth(): AuthContextValue {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [guestPrefs, setGuestPrefs] = useState<SolverPrefsT>();
+  const [loadingGuestPrefs, setLoadingGuestPrefs] = useState(true);
+
+  //only runs once because of loadingGuests bool
+  useEffect(() => {
+    try {
+      //set prefs based on key in your specific browser, localstorage is per browser storage
+      const serializedPrefs = localStorage.getItem(
+        GUEST_SOLVER_PREFS_STORAGE_KEY
+      );
+
+      //if you get it
+      if (serializedPrefs) {
+        const validationResult = SolverPrefsV.decode(
+          JSON.parse(serializedPrefs)
+        );
+        if (isRight(validationResult)) {
+          //set this prefs in your localstorage
+          setGuestPrefs(validationResult.right);
+        } else {
+          console.error(
+            'Could not decode guest solver preferences',
+            PathReporter.report(validationResult).join(',')
+          );
+          setGuestPrefs({});
+        }
+      } else {
+        setGuestPrefs({});
+      }
+    } catch (error) {
+      console.error('Could not load guest solver preferences', error);
+      setGuestPrefs({});
+    } finally {
+      //wont run again
+      setLoadingGuestPrefs(false);
+    }
+  }, []);
+
+  const updateGuestPrefs = useCallback((prefs: SolverPrefsT) => {
+    try {
+      localStorage.setItem(
+        GUEST_SOLVER_PREFS_STORAGE_KEY,
+        JSON.stringify(prefs)
+      );
+    } catch (error) {
+      console.error('Could not save guest solver preferences', error);
+      throw error;
+    }
+    setGuestPrefs(prefs);
+  }, []);
 
   // Current user
   const [user, loadingUser, authError] = useAuthState(getAuth());
@@ -82,6 +137,7 @@ export function useAuth(): AuthContextValue {
   }, [accountPrefsDoc]);
   const accountPrefsError =
     accountPrefsDBError?.message || accountPrefsDecodeError;
+  const hasAccount = !!user?.email && !user.isAnonymous;
 
   const [notificationsSnapshot, , notificationError] =
     useCollection(notificationsDocRef);
@@ -192,8 +248,14 @@ export function useAuth(): AuthContextValue {
     isAdmin,
     constructorPage,
     notifications,
-    prefs: accountPrefs,
-    loading: isLoading || loadingUser || loadingCP || loadingAccountPrefs,
+    prefs: hasAccount ? accountPrefs : guestPrefs,
+    updateGuestPrefs,
+    loading:
+      isLoading ||
+      loadingUser ||
+      loadingCP ||
+      loadingAccountPrefs ||
+      (!hasAccount && loadingGuestPrefs),
     error:
       authError?.message ||
       cpError?.message ||

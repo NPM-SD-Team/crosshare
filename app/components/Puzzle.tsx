@@ -168,6 +168,30 @@ export interface NextPuzzleLink {
   linkText: string;
 }
 
+export default function DefaultNavigation() {
+  return (
+    <>
+      <div>
+        <TopBarDropDownLinkA
+          href={`/`}
+          icon={<FaHome />}
+          text="All Crosswords"
+        />
+        <TopBarDropDownLinkA
+          href={`https://nebraskapublicmedia.org/en/nebraska-public-media-labs/`}
+          icon={<FaGamepad />}
+          text="Games"
+        />
+        <TopBarDropDownLinkImage
+          src={'/Logo.png'}
+          href={`https://nebraskapublicmedia.org/`}
+          text="Nebraska Public Media Home"
+        />
+      </div>
+    </>
+  );
+}
+
 const KeepTryingOverlay = ({
   dispatch,
 }: {
@@ -301,7 +325,9 @@ export const Puzzle = ({
       contestEmail: play.ct_em,
       contestSubmitTime: play.ct_t?.toMillis(),
     }),
+    /**when the current active timing period began, 0 means its paused */
     currentTimeWindowStart: 0,
+    settingsOpenCurrently: false,
     didCheat: play ? play.ch : false,
     clueView: false,
     cellsUpdatedAt: play ? play.ct : puzzle.grid.map(() => 0),
@@ -374,19 +400,23 @@ export const Puzzle = ({
     };
   }, [state.currentTimeWindowStart, dispatch]);
 
+  //regular pause
+  function pause() {
+    window.parent.postMessage(
+      {
+        type: 'pause',
+        elapsed: state.displaySeconds,
+      },
+      '*'
+    );
+    dispatch({ type: 'PAUSEACTION' });
+    cachePlayForUser(props.user);
+    writePlayToDBIfNeeded();
+  }
   // Pause when page goes out of focus
   function autoPause() {
     if (document.hidden && !props.prefs?.dontPauseOnLostFocus) {
-      window.parent.postMessage(
-        {
-          type: 'pause',
-          elapsed: state.displaySeconds,
-        },
-        '*'
-      );
-      dispatch({ type: 'PAUSEACTION' });
-      cachePlayForUser(props.user);
-      writePlayToDBIfNeeded();
+      pause();
     }
   }
   useEventListener('visibilitychange', autoPause);
@@ -551,6 +581,7 @@ export const Puzzle = ({
       puzzle.title,
       state.bankedSeconds,
       state.currentTimeWindowStart,
+      state.settingsOpenCurrently,
       state.contestSubmission,
       state.contestSubmitTime,
       state.contestEmail,
@@ -1026,8 +1057,28 @@ export const Puzzle = ({
   const moreMenu = useMemo(
     () => (
       <>
+        {/* pause also when you are in the settings too*/}
         <TopBarDropDown
           contentWidth={240}
+          onClick={() => {
+            {
+              /*when you open settings pause and mark as opened
+              that way the regular pausem menu knows not to 
+              auto open
+              
+              then resume and close settings
+              
+              why use dispatch instead of just a regular variable? great question: ¯\_(ツ)_/¯ 
+              i did it because all the other variables by currentTimeWindowStart checking to open
+              the pause menu are states - Sky*/
+            }
+            dispatch({ type: 'PAUSEACTION' });
+            dispatch({ type: 'OPENEDSETTINGS' });
+          }}
+          onClose={() => {
+            dispatch({ type: 'RESUMEACTION' });
+            dispatch({ type: 'CLOSEDSETTINGS' });
+          }}
           //settings menu gear
           icon={isSlate ? <More /> : <FaCog />}
         >
@@ -1037,7 +1088,7 @@ export const Puzzle = ({
                 ''
               ) : (
                 <>
-                  {mounted && user !== undefined && !user.isAnonymous ? (
+                  {mounted ? (
                     <>
                       <h2 className={styles.solverPreferencesHeader}>
                         {t`Solver Preferences`}
@@ -1051,7 +1102,10 @@ export const Puzzle = ({
                       >
                         <SolverPreferencesList
                           prefs={props.prefs}
-                          userId={user.uid}
+                          userId={
+                            user && !user.isAnonymous ? user.uid : undefined
+                          }
+                          onGuestPrefsChange={authContext.updateGuestPrefs}
                         />
                       </ul>
                     </>
@@ -1070,21 +1124,7 @@ export const Puzzle = ({
                   text={t`Resume`}
                 />
               </div>
-              <TopBarDropDownLinkA
-                href={`/`}
-                icon={<FaHome />}
-                text="All Crosswords"
-              />
-              <TopBarDropDownLinkA
-                href={`/`}
-                icon={<FaGamepad />}
-                text="Games"
-              />
-              <TopBarDropDownLinkImage
-                src={'/Logo.png'}
-                href={`https://nebraskapublicmedia.org/`}
-                text="Nebraska Public Media Home"
-              />
+              <DefaultNavigation />
 
               {!state.success ? (
                 <>
@@ -1228,7 +1268,7 @@ export const Puzzle = ({
         <DownsOnlyContext.Provider value={state.downsOnly && !state.success}>
           <FullscreenCSS />
           <Head>
-            <title>{`${puzzle.title} | Crosshare crossword puzzle`}</title>
+            <title>{`${puzzle.title} | Nebraska Public Media`}</title>
             <I18nTags
               locale={locale}
               canonicalPath={`/puzzles/${puzzle.id}/${slugify(puzzle.title)}`}
@@ -1314,16 +1354,8 @@ export const Puzzle = ({
                                 : timeString(state.displaySeconds, true)
                             }
                             onClick={() => {
-                              window.parent.postMessage(
-                                {
-                                  type: 'pause',
-                                  elapsed: state.displaySeconds,
-                                },
-                                '*'
-                              );
-                              dispatch({ type: 'PAUSEACTION' });
-                              cachePlayForUser(props.user);
-                              writePlayToDBIfNeeded();
+                              //pause
+                              pause();
                             }}
                             keepText={!isSlate}
                           />
@@ -1394,7 +1426,16 @@ export const Puzzle = ({
                   ) : (
                     <>
                       {isSlate ? <div className="flexGrow1" /> : ''}
-                      <div className={styles.topBarLeft}>{moreMenu}</div>
+                      <div className={styles.topBarLeft}>
+                        {moreMenu}
+                        <div className={styles.topBarLeftControls}>
+                          {/*printing button, printer */}
+                          <TopBarLinkA
+                            href={`/api/pdf/${puzzle.id}${isSlate ? '?slate=1' : ''}`}
+                            icon={<FaPrint />}
+                          />
+                        </div>
+                      </div>
                       <div className={styles.topBarRight}>
                         <TopBarLink
                           icon={isSlate ? <Stats /> : <FaComment />}
@@ -1435,7 +1476,10 @@ export const Puzzle = ({
                 )}
               </TopBar>
             </div>
-            {state.filled && !state.success && !state.dismissedKeepTrying ? (
+            {state.filled &&
+            !state.success &&
+            !state.settingsOpenCurrently &&
+            !state.dismissedKeepTrying ? (
               <KeepTryingOverlay dispatch={dispatch} />
             ) : (
               ''
@@ -1467,7 +1511,11 @@ export const Puzzle = ({
             ) : (
               ''
             )}
+            {/*always open a menu if its paused(or jsut begun) 
+            the settings are closed, its not finished and not filled 
+            and whehter the player dismissed the keep trying overlay */}
             {state.currentTimeWindowStart === 0 &&
+            !state.settingsOpenCurrently &&
             !state.success &&
             !(state.filled && !state.dismissedKeepTrying) ? (
               state.bankedSeconds === 0 ? (

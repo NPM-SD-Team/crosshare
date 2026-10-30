@@ -216,6 +216,7 @@ export default requiresAdmin(() => {
     setSendingTestEmail(true);
     try {
       const token = await user.getIdToken();
+      // The server checks this sign-in token before sending the test message.
       const response = await fetch(withBasePath('/api/admin/test-email'), {
         method: 'POST',
         headers: {

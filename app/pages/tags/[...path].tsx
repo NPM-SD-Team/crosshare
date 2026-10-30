@@ -126,12 +126,12 @@ export default function TagPageHandler(props: PageProps) {
 
   const page = props.currentPage;
   const title = props.article?.t
-    ? `${props.article.t} | Crosshare`
+    ? `${props.article.t} | NPM Games`
     : t`Tagged Puzzles` +
       ' | ' +
       displayTags +
       (page > 0 ? ' | ' + t`Page ${page}` : '') +
-      ' | Crosshare';
+      ' | NPM Games';
   const description = props.article?.c
     ? props.article.c
     : t`The latest public puzzles tagged with ${displayTags}`;
@@ -155,7 +155,7 @@ export default function TagPageHandler(props: PageProps) {
         {props.prevPage !== null ? (
           <link
             rel="prev"
-            href={`https://crosshare.org${
+            href={`https://labs.nebraskapublicmedia.org/crosswords${
               loc == 'en' ? '' : '/' + loc
             }/tags/${urlTags}${
               props.prevPage !== 0 ? `/page/${props.prevPage}` : ''
@@ -167,7 +167,7 @@ export default function TagPageHandler(props: PageProps) {
         {props.nextPage !== null ? (
           <link
             rel="next"
-            href={`https://crosshare.org${
+            href={`https://labs.nebraskapublicmedia.org/crosswords${
               loc == 'en' ? '' : '/' + loc
             }/tags/${urlTags}/page/${props.nextPage}`}
           />

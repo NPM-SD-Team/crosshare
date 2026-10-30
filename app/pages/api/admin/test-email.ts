@@ -20,6 +20,7 @@ export default async function handler(
     return;
   }
 
+  // Check admin access on the server since a hidden admin button is not security
   let claims: DecodedIdToken;
   try {
     claims = await getAuth(getAdminApp()).verifyIdToken(token);
@@ -40,15 +41,34 @@ export default async function handler(
 
   try {
     const client = await getClient();
-    await client.sendMail({
-      from: 'Nebraska Public Media Labs <labs@nebraskapublicmedia.org>',
-      to: claims.email,
-      subject: 'NPM SMTP test',
-      text: 'This is a test email from the NPM Games admin page.',
-    });
-    res.status(200).json({ message: 'Test email sent' });
+    try {
+      // SMTP credentials and connections stay on the server
+
+      await client.sendMail({
+        from: 'Nebraska Public Media Labs <labs@nebraskapublicmedia.org>',
+        to: claims.email,
+        subject: 'NPM SMTP test',
+        text: 'This is a test email from the NPM Games admin page.',
+      });
+      res.status(200).json({ message: 'Test email sent' });
+    } catch (error) {
+      console.error('Failed to send admin test email', error);
+      const code =
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        typeof error.code === 'string'
+          ? error.code
+          : undefined;
+      res.status(500).json({
+        message: code
+          ? `SMTP request failed (${code})`
+          : 'Failed to send test email',
+      });
+    }
   } catch (error) {
-    console.error('Failed to send admin test email', error);
+    //if this fails its because the client refused
+    console.error('Failed to get client', error);
     const code =
       typeof error === 'object' &&
       error !== null &&
@@ -56,9 +76,9 @@ export default async function handler(
       typeof error.code === 'string'
         ? error.code
         : undefined;
-    res.status(500).json({
+    res.status(501).json({
       message: code
-        ? `SMTP request failed (${code})`
+        ? `SMTP client connection refused (${code})`
         : 'Failed to send test email',
     });
   }
