@@ -11,8 +11,6 @@ import { AiOutlineEnter } from 'react-icons/ai';
 import {
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
-  FaAngleLeft,
-  FaAngleRight,
   FaBackspace,
 } from 'react-icons/fa';
 import { clsx } from '../lib/utils.js';
@@ -217,14 +215,14 @@ export const Keyboard = memo(function Keyboard({
         />
       </KeyRow>
       <KeyRow>
-        <Key
+        {/* <Key
           touched={touched}
           onlyOnTablet={props.includeBlockKey}
           keyStroke="{prev}"
           smallSize={true}
           display={<FaAngleLeft />}
           onKeypress={keypress}
-        />
+        /> */}
         <Key touched={touched} keyStroke="A" onKeypress={keypress} />
         <Key touched={touched} keyStroke="S" onKeypress={keypress} />
         <Key touched={touched} keyStroke="D" onKeypress={keypress} />
@@ -253,14 +251,14 @@ export const Keyboard = memo(function Keyboard({
           display={<AiOutlineEnter />}
           onKeypress={keypress}
         />
-        <Key
+        {/* <Key
           touched={touched}
           onlyOnTablet={props.includeBlockKey}
           keyStroke="{next}"
           smallSize={true}
           display={<FaAngleRight />}
           onKeypress={keypress}
-        />
+        /> */}
       </KeyRow>
       <KeyRow>
         <Key
