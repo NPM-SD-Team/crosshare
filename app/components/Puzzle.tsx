@@ -1512,7 +1512,7 @@ export const Puzzle = ({
               ''
             )}
             {/*always open a menu if its paused(or jsut begun) 
-            the settings are closed, its not finished and not filled 
+            the settings are closed, its not finished and not  
             and whehter the player dismissed the keep trying overlay */}
             {state.currentTimeWindowStart === 0 &&
             !state.settingsOpenCurrently &&

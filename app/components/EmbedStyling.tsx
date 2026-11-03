@@ -48,7 +48,7 @@ export function EmbedStyling(props: EmbedStylingProps) {
   const colorTheme = colorThemeString(props);
   const reverseTheme = colorThemeString({
     ...props,
-    darkMode: !props.darkMode,
+    darkMode: false, //!props.darkMode, turned off darkmode
   });
   return (
     <Head>

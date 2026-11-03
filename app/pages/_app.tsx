@@ -34,7 +34,7 @@ const darkTheme = colorThemeString({
   link: LINK,
   errorColor: ERROR_COLOR,
   verifiedColor: VERIFIED_COLOR,
-  darkMode: true,
+  darkMode: false, //turned off darkmode
   preservePrimary: false,
 });
 

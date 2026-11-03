@@ -70,7 +70,7 @@ const getFollowingIds = async (userId: string) => {
 };
 
 const gssp: GetServerSideProps<PageProps> = async ({ res, params }) => {
-  if (!params || !Array.isArray(params.slug) || !params.slug[0]) {
+  if (!params || !Array.isArray(params.slug) || !params.slug[0] || true) {
     console.error('bad constructor page params');
     res.statusCode = 404;
     return { props: { error: 'Bad username' } };
