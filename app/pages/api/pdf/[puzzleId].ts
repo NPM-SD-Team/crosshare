@@ -1,6 +1,8 @@
 import { jsPDF } from 'jspdf';
+import { readFile } from 'node:fs/promises';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getPuzzle, userIdToPage } from '../../../lib/serverOnly.js';
+import { join } from 'node:path';
+import { getPuzzle } from '../../../lib/serverOnly.js';
 import {
   Direction,
   PuzzleT,
@@ -14,13 +16,34 @@ import {
   fromCells,
 } from '../../../lib/viewableGrid.js';
 
+async function pathToBase64(path: string): Promise<string> {
+  const image = await readFile(join(process.cwd(), 'public', path));
+  return `data:image/png;base64,${image.toString('base64')}`;
+}
+
 function layoutPDFClues(
   doc: jsPDF,
   puzzle: PuzzleT,
   grid: ViewableGrid<ViewableEntry>,
-  squareSize: number,
   yOffset: number
 ) {
+  const margin = 15;
+  const pageW = doc.internal.pageSize.getWidth();
+  const contentW = pageW - margin * 2;
+  const gutter = 10; // between the A and D sections
+  const subGutter = 5; // between the two columns inside each section
+  const sectionW = (contentW - gutter) / 2;
+  const subColW = (sectionW - subGutter) / 2;
+  const acrossX = margin;
+  const downX = margin + sectionW + gutter;
+  const pageH = doc.internal.pageSize.getHeight();
+  const footerH = 10;
+  const headingH = 8;
+  const cluesBottom = pageH - margin - footerH;
+  const firstCluesTop = yOffset + grid.height + 10;
+  const lineHeightFactor = doc.getLineHeightFactor();
+  const pointsToMillimeters = 0.3528;
+
   const clued = addClues(grid, puzzle.clues, (_c) => {
     return { type: 'root', children: [] };
   });
@@ -38,117 +61,179 @@ function layoutPDFClues(
     label: e.labelNumber.toString(),
     clue: getClueText(e),
   }));
-  function marginTop(x: number, addedPage: boolean) {
-    if (
-      addedPage ||
-      x > format.marginLeft + squareSize * puzzle.size.cols + 10
-    ) {
-      return 85;
-    }
-    return 100 + squareSize * puzzle.size.rows;
-  }
-  const format = {
-    font: 'helvetica',
-    fontSize: 9,
-    labelWidth: 19,
-    clueWidth: 94,
-    columnSeparator: 12,
-    marginBottom: doc.internal.pageSize.height - 50,
-    marginLeft: 50,
-    marginRight: doc.internal.pageSize.width - 50,
-  };
-  doc.setFont(format.font);
-  doc.setFontSize(format.fontSize);
-  let x = format.marginLeft;
-  let y = marginTop(x, false) + yOffset;
-  let addedPage = false;
-  const constructorNote: { label: string; clue: string }[] = [];
-  if (puzzle.constructorNotes) {
-    constructorNote.push(
-      { label: '', clue: puzzle.constructorNotes },
-      { label: '', clue: '' }
-    );
-  }
-  const acrossTitle = [{ label: 'ACROSS', clue: '' }];
-  const downTitle = [
-    { label: '', clue: '' },
-    { label: 'DOWN', clue: '' },
-  ];
-  const allClues = constructorNote
-    .concat(acrossTitle)
-    .concat(acrossClues)
-    .concat(downTitle)
-    .concat(downClues);
-  for (const [idx, clue] of allClues.entries()) {
-    // Position clue on page
-    const width = clue.label
-      ? format.clueWidth
-      : format.clueWidth + format.labelWidth;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const clueText = doc.splitTextToSize(getClueText(clue), width);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const adjustY = clueText.length * (format.fontSize + 3);
 
-    // If we have an across/down heading make sure the first clue will fit in this column too
-    let testAdjustY = adjustY;
-    if (['across', 'down'].includes(clue.label.toLowerCase())) {
-      const nextClue = allClues[idx + 1];
-      if (!nextClue) {
+  type WrappedClue = { lines: string[] };
+  type ClueCursor = { clueIndex: number; lineIndex: number };
+  const wrapClues = (
+    clues: { label: string; clue: string }[],
+    width: number
+  ): WrappedClue[] =>
+    clues.map(({ label, clue }) => ({
+      lines: doc.splitTextToSize(`${label}. ${clue}`, width),
+    }));
+
+  const availableHeight = (top: number) => cluesBottom - (top + headingH + 2);
+
+  let cluesTop = firstCluesTop;
+  const minLineHeight = 8 * lineHeightFactor * pointsToMillimeters;
+  if (availableHeight(cluesTop) < minLineHeight) {
+    doc.addPage();
+    cluesTop = margin;
+  }
+
+  let fontSize = 12;
+  let across: WrappedClue[];
+  let down: WrappedClue[];
+  let lineHeight: number;
+  let linesPerColumn: number;
+  while (true) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(fontSize);
+    across = wrapClues(acrossClues, subColW);
+    down = wrapClues(downClues, subColW);
+    lineHeight = fontSize * lineHeightFactor * pointsToMillimeters;
+    linesPerColumn = Math.max(
+      1,
+      Math.floor(availableHeight(cluesTop) / lineHeight)
+    );
+    if (
+      (across.reduce((count, clue) => count + clue.lines.length, 0) <=
+        linesPerColumn * 2 &&
+        down.reduce((count, clue) => count + clue.lines.length, 0) <=
+          linesPerColumn * 2) ||
+      fontSize <= 8
+    ) {
+      break;
+    }
+    fontSize -= 0.5;
+  }
+
+  const flowClues = (
+    clues: WrappedClue[],
+    cursor: ClueCursor
+  ): { cols: [string[], string[]]; next: ClueCursor } => {
+    const cols: [string[], string[]] = [[], []];
+    let col = 0;
+    while (col < cols.length && cursor.clueIndex < clues.length) {
+      const clue = clues[cursor.clueIndex];
+      if (!clue) {
+        throw new Error('clue index out of bounds');
+      }
+      const line = clue.lines[cursor.lineIndex];
+      if (line === undefined) {
+        cursor.clueIndex += 1;
+        cursor.lineIndex = 0;
         continue;
       }
-      const nextWidth = nextClue.label
-        ? format.clueWidth
-        : format.clueWidth + format.labelWidth;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const nextClueText = doc.splitTextToSize(
-        getClueText(nextClue),
-        nextWidth
-      );
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      testAdjustY += nextClueText.length * (format.fontSize + 3);
-    }
-    if (y + testAdjustY > format.marginBottom) {
-      x += format.labelWidth + format.clueWidth + format.columnSeparator;
-      if (x + format.labelWidth > format.marginRight) {
-        doc.addPage();
-        x = format.marginLeft;
-        addedPage = true;
+
+      const column = cols[col];
+      if (!column) {
+        throw new Error('clue column out of bounds');
       }
-      y = marginTop(x, addedPage) + yOffset;
+      column.push(line);
+      cursor.lineIndex += 1;
+      if (column.length === linesPerColumn) {
+        col += 1;
+      }
     }
-    if (['across', 'down'].includes(clue.label.toLowerCase())) {
-      // Make Across, Down headings bold
-      doc.setFont('helvetica', 'bold');
-      doc.text(clue.label, x, y);
-    } else {
-      doc.setFont('helvetica', 'normal');
-      doc.text(clue.label, x + format.labelWidth - 5, y, {
-        align: 'right',
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      doc.text(clueText, x + (clue.label ? format.labelWidth : 0), y);
+    while (
+      cursor.clueIndex < clues.length &&
+      cursor.lineIndex === clues[cursor.clueIndex]?.lines.length
+    ) {
+      cursor.clueIndex += 1;
+      cursor.lineIndex = 0;
     }
-    y += adjustY;
-  }
+    return { cols, next: cursor };
+  };
+
+  const ACCENT: [number, number, number] = [22, 26, 100];
+  let acrossCursor: ClueCursor = { clueIndex: 0, lineIndex: 0 };
+  let downCursor: ClueCursor = { clueIndex: 0, lineIndex: 0 };
+  let firstPage = true;
+  do {
+    if (!firstPage) {
+      doc.addPage();
+      cluesTop = margin;
+      linesPerColumn = Math.max(
+        1,
+        Math.floor(availableHeight(cluesTop) / lineHeight)
+      );
+    }
+
+    const acrossPage = flowClues(across, acrossCursor);
+    const downPage = flowClues(down, downCursor);
+    acrossCursor = acrossPage.next;
+    downCursor = downPage.next;
+    const cluesY = cluesTop + headingH;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...ACCENT);
+    doc.setDrawColor(...ACCENT);
+    doc.setLineWidth(0.4);
+    doc.text('ACROSS', acrossX, cluesTop + 4);
+    doc.line(acrossX, cluesTop + 6, acrossX + sectionW, cluesTop + 6);
+    doc.text('DOWN', downX, cluesTop + 4);
+    doc.line(downX, cluesTop + 6, downX + sectionW, cluesTop + 6);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(fontSize);
+    doc.setTextColor(40);
+    const drawLines = (lines: string[], x: number) => {
+      if (lines.length) {
+        doc.text(lines, x, cluesY + 2);
+      }
+    };
+    drawLines(acrossPage.cols[0], acrossX);
+    drawLines(acrossPage.cols[1], acrossX + subColW + subGutter);
+    drawLines(downPage.cols[0], downX);
+    drawLines(downPage.cols[1], downX + subColW + subGutter);
+
+    //divider
+    doc.setDrawColor(210);
+    doc.setLineWidth(0.2);
+    doc.line(
+      margin + sectionW + gutter / 2,
+      cluesTop,
+      margin + sectionW + gutter / 2,
+      cluesBottom
+    );
+
+    //footer
+    doc.line(margin, pageH - margin - 4, pageW - margin, pageH - margin - 4);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(
+      'labs.nebraskapublicmedia.org/crosswords',
+      pageW / 2,
+      pageH - margin + 1,
+      { align: 'center' }
+    );
+    firstPage = false;
+  } while (
+    acrossCursor.clueIndex < across.length ||
+    downCursor.clueIndex < down.length
+  );
 }
 
 function layoutPDFGrid(
   doc: jsPDF,
-  x: number,
   y: number,
   puzzle: PuzzleT,
   grid: ViewableGrid<ViewableEntry>
 ): number {
+  const PointsToMillimeters = 0.3528;
   const squareSize = Math.min(
     24,
-    360 / puzzle.size.rows,
-    360 / puzzle.size.cols
+    (360 / puzzle.size.rows) * PointsToMillimeters,
+    (360 / puzzle.size.cols) * PointsToMillimeters
   );
+  const pageW = doc.internal.pageSize.getWidth();
   const format = {
     squareSize: squareSize,
-    gridOrigin: { x: x, y: y },
+    gridOrigin: { x: pageW / 2 - (squareSize * puzzle.size.rows) / 2, y: y },
     labelOffset: { x: squareSize / 24, y: squareSize / 4 },
-    labelFontSize: squareSize / 3.5,
+    labelFontSize: squareSize / PointsToMillimeters / 3.5,
     lineWidth: 0.5,
     barWidth: 4,
   };
@@ -164,7 +249,11 @@ function layoutPDFGrid(
       const barRight = puzzle.vBars.includes(square);
       const barBottom = puzzle.hBars.includes(square);
       doc.setFillColor(
-        puzzle.grid[square] === '.' ? '#555' : shaded ? '#DDD' : 'white'
+        puzzle.grid[square] === '.'
+          ? 'rgb(57, 53, 89)'
+          : shaded
+            ? '#DDD'
+            : 'white'
       );
       if (!hidden) {
         doc.rect(
@@ -223,12 +312,14 @@ function layoutPDFGrid(
   return squareSize;
 }
 
-function layoutPDFInfo(
-  doc: jsPDF,
-  puzzle: PuzzleT,
-  constructorUsername: string | null,
-  isSlate: boolean
-): number {
+async function layoutPDFInfo(doc: jsPDF, puzzle: PuzzleT) {
+  const logoSize = 22;
+  const margin = 15;
+  const pageW = doc.internal.pageSize.getWidth();
+  const contentW = pageW - margin * 2;
+  const ACCENT: [number, number, number] = [22, 26, 100];
+  const LOGO = await pathToBase64('NPM_Logo.png');
+  doc.addImage(LOGO, 'PNG', margin, margin, logoSize, logoSize);
   doc.setFont('helvetica');
   doc.setFontSize(18);
 
@@ -237,71 +328,36 @@ function layoutPDFInfo(
     puzzle.title,
     doc.internal.pageSize.width - 100
   );
-  const extraLines = title.length - 1;
-  doc.text(title, 50, 58);
+  const textX = margin + logoSize + 6;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(24);
+  doc.setTextColor(...ACCENT);
+  doc.text(title, textX, margin + 9, {
+    maxWidth: contentW - logoSize - 6,
+  });
 
-  doc.setFontSize(9);
-
-  const publishedByLine = createPublishedByLine(
-    puzzle,
-    constructorUsername,
-    isSlate
-  );
-  doc.text(publishedByLine, 50, 50 + 20 + extraLines * 21);
-  return extraLines * 21;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(100);
+  doc.text(createPublishedByLine(puzzle), textX, margin + 18);
+  const ruleY = margin + logoSize + 5;
+  doc.setDrawColor(...ACCENT);
+  doc.setLineWidth(0.8);
+  doc.line(margin, ruleY, pageW - margin, ruleY);
+  return ruleY + 5;
 }
 
-async function getConstructor(authorId: string): Promise<string | null> {
-  const res = await userIdToPage(authorId);
-
-  return res?.i ?? null;
-}
-
-function createPublishedByLine(
-  puzzle: PuzzleT,
-  constructorUsername: string | null,
-  isSlate: boolean
-) {
+function createPublishedByLine(puzzle: PuzzleT) {
   let authorText;
-  const urlText = createAttributionLink(puzzle, constructorUsername);
   if (puzzle.guestConstructor) {
-    if (isSlate) {
-      authorText = `By ${puzzle.guestConstructor} - Powered by crosshare.org`;
-    } else {
-      authorText = `By ${puzzle.guestConstructor} - Published by ${puzzle.authorName}${urlText}`;
-    }
+    authorText = `By ${puzzle.guestConstructor} - Published by ${puzzle.authorName}`;
   } else {
-    if (isSlate) {
-      authorText = `By ${puzzle.authorName} - Powered by crosshare.org`;
-    } else {
-      authorText = `By ${puzzle.authorName} - Published${urlText}`;
-    }
+    authorText = `By ${puzzle.authorName} - Published`;
   }
   return authorText;
 }
 
-function createAttributionLink(
-  puzzle: PuzzleT,
-  constructorUsername: string | null
-) {
-  let urlText;
-  if (
-    constructorUsername &&
-    (puzzle.isPrivate === false ||
-      (puzzle.isPrivateUntil && puzzle.isPrivateUntil < Date.now()))
-  ) {
-    urlText = ` on https://crosshare.org/${constructorUsername}`;
-  } else {
-    urlText = ` on https://crosshare.org`;
-  }
-  return urlText;
-}
-
-function getPdf(
-  puzzle: PuzzleT,
-  constructorUsername: string | null,
-  isSlate: boolean
-): ArrayBuffer {
+async function getPdf(puzzle: PuzzleT): Promise<ArrayBuffer> {
   console.log('Generating pdf for ' + puzzle.title);
 
   const grid = fromCells({
@@ -318,20 +374,15 @@ function getPdf(
     hidden: new Set(puzzle.hidden),
   });
 
-  const pdf = new jsPDF('p', 'pt');
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
   pdf.setProperties({
     title: puzzle.title,
-    creator: 'crosshare.org',
+    creator: 'labs.nebraskapublicmedia.org/crosswords',
     author: puzzle.authorName,
   });
-  const extraPaddingTop = layoutPDFInfo(
-    pdf,
-    puzzle,
-    constructorUsername,
-    isSlate
-  );
-  const squareSize = layoutPDFGrid(pdf, 50, 80 + extraPaddingTop, puzzle, grid);
-  layoutPDFClues(pdf, puzzle, grid, squareSize, extraPaddingTop);
+  const headerEnd = await layoutPDFInfo(pdf, puzzle);
+  const squareSize = layoutPDFGrid(pdf, headerEnd, puzzle, grid);
+  layoutPDFClues(pdf, puzzle, grid, squareSize + headerEnd + 100);
   return pdf.output('arraybuffer');
 }
 
@@ -359,7 +410,6 @@ export default async function pdf(req: NextApiRequest, res: NextApiResponse) {
     return;
   }
 
-  const constructorUsername = await getConstructor(fromDB.authorId);
   res.setHeader('X-Robots-Tag', 'noindex');
   res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
   res.setHeader(
@@ -367,5 +417,5 @@ export default async function pdf(req: NextApiRequest, res: NextApiResponse) {
     'inline; filename="' + puzzle.t.replace(/[^\w ]/g, '') + '.pdf"'
   );
   res.writeHead(200, { 'Content-Type': 'application/pdf' });
-  res.end(Buffer.from(getPdf(fromDB, constructorUsername, isSlate)));
+  res.end(Buffer.from(await getPdf(fromDB)));
 }
