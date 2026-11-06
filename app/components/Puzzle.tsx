@@ -1393,16 +1393,7 @@ export const Puzzle = ({
                             dispatch(a);
                           }}
                         />
-                        <TopBarLink
-                          icon={<Rebus />}
-                          onClick={() => {
-                            const kpa: KeypressAction = {
-                              type: 'KEYPRESS',
-                              key: { k: KeyK.Escape },
-                            };
-                            dispatch(kpa);
-                          }}
-                        />
+
                         {isSlate ? <SlateButtonMargin /> : ''}
                         {state.draftMode && !isSlate ? (
                           <TopBarLink
@@ -1420,6 +1411,16 @@ export const Puzzle = ({
                           ''
                         )}
                         {checkRevealMenus}
+                        <TopBarLink
+                          icon={<Rebus />}
+                          onClick={() => {
+                            const kpa: KeypressAction = {
+                              type: 'KEYPRESS',
+                              key: { k: KeyK.Escape },
+                            };
+                            dispatch(kpa);
+                          }}
+                        />
                         {isSlate ? <SlateButtonMargin /> : ''}
                       </div>
                     </>
@@ -1437,6 +1438,28 @@ export const Puzzle = ({
                         </div>
                       </div>
                       <div className={styles.topBarRight}>
+                        <TopBarLink
+                          icon={
+                            state.clueView ? (
+                              isSlate ? (
+                                <Grid />
+                              ) : (
+                                <SpinnerFinished />
+                              )
+                            ) : isSlate ? (
+                              <Clues />
+                            ) : (
+                              <FaListOl />
+                            )
+                          }
+                          text={state.clueView ? t`Grid` : t`Clues`}
+                          onClick={() => {
+                            const a: ToggleClueViewAction = {
+                              type: 'TOGGLECLUEVIEW',
+                            };
+                            dispatch(a);
+                          }}
+                        />
                         <TopBarLink
                           icon={isSlate ? <Stats /> : <FaComment />}
                           text={

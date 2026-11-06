@@ -105,7 +105,7 @@ export default function HomePage({
   const { user } = useContext(AuthContext);
   //just the newsest puzzle out of the newest filtered list
   const todaysPuzzle = newest[0];
-  const title = t`NPM Games - Daily Crossword Puzzles`;
+  const title = t`Daily Crossword Puzzles | Nebraska Public Media`;
   return (
     <>
       <Head>
@@ -113,8 +113,8 @@ export default function HomePage({
         <I18nTags locale={router.locale || 'en'} canonicalPath="/" />
       </Head>
       <div style={{ position: 'sticky', top: '0', zIndex: '99' }}>
-        <DefaultTopBar />
         <ParentWebsiteHeader />
+        <DefaultTopBar />
       </div>
 
       <div className="margin1em">

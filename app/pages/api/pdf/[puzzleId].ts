@@ -44,6 +44,7 @@ function layoutPDFClues(
   const lineHeightFactor = doc.getLineHeightFactor();
   const pointsToMillimeters = 0.3528;
 
+  //decompile the clues from the puzzle.clues into their root
   const clued = addClues(grid, puzzle.clues, (_c) => {
     return { type: 'root', children: [] };
   });
@@ -62,8 +63,12 @@ function layoutPDFClues(
     clue: getClueText(e),
   }));
 
+  //A list of clues wrapped by pagination
   type WrappedClue = { lines: string[] };
+  //where you are in the iteration
   type ClueCursor = { clueIndex: number; lineIndex: number };
+
+  //split clues by width so they go over to the left and right
   const wrapClues = (
     clues: { label: string; clue: string }[],
     width: number
@@ -86,6 +91,8 @@ function layoutPDFClues(
   let down: WrappedClue[];
   let lineHeight: number;
   let linesPerColumn: number;
+
+  //this loop will keep sizing down until the font size is a minimum 8 pts, to help fit better
   while (true) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(fontSize);
@@ -101,7 +108,7 @@ function layoutPDFClues(
         linesPerColumn * 2 &&
         down.reduce((count, clue) => count + clue.lines.length, 0) <=
           linesPerColumn * 2) ||
-      fontSize <= 8
+      fontSize <= 10
     ) {
       break;
     }
@@ -166,6 +173,7 @@ function layoutPDFClues(
     downCursor = downPage.next;
     const cluesY = cluesTop + headingH;
 
+    //headers
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.setTextColor(...ACCENT);
@@ -176,6 +184,7 @@ function layoutPDFClues(
     doc.text('DOWN', downX, cluesTop + 4);
     doc.line(downX, cluesTop + 6, downX + sectionW, cluesTop + 6);
 
+    //the lines undernearth the headers
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(fontSize);
     doc.setTextColor(40);
@@ -250,7 +259,7 @@ function layoutPDFGrid(
       const barBottom = puzzle.hBars.includes(square);
       doc.setFillColor(
         puzzle.grid[square] === '.'
-          ? 'rgb(57, 53, 89)'
+          ? 'rgb(53, 63, 89)'
           : shaded
             ? '#DDD'
             : 'white'
@@ -414,7 +423,7 @@ export default async function pdf(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
   res.setHeader(
     'Content-Disposition',
-    'inline; filename="' + puzzle.t.replace(/[^\w ]/g, '') + '.pdf"'
+    'inline; filename="' + puzzle.a.replace(' ', '_') + '.pdf"'
   );
   res.writeHead(200, { 'Content-Type': 'application/pdf' });
   res.end(Buffer.from(await getPdf(fromDB)));

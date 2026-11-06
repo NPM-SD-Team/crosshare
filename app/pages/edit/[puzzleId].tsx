@@ -313,6 +313,7 @@ const PuzzleEditor = ({
   const { showSnackbar } = useSnackbar();
 
   const [isPrivate, setIsPrivate] = useState(puzzle.isPrivate);
+  const [publishedDate, setPublishedDate] = useState(puzzle.publishTime);
   const [isPrivateUntil, setIsPrivateUntil] = useState(puzzle.isPrivateUntil);
   const [addingAlternate, setAddingAlternate] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
@@ -363,14 +364,11 @@ const PuzzleEditor = ({
     <>
       <GridContext.Provider value={grid}>
         <Head>
-          <title>{`Editing | ${puzzle.title} | Crosshare`}</title>
+          <title>{`Editing | ${puzzle.title} | Nebraska Public Media`}</title>
         </Head>
         <DefaultTopBar />
         <div className="margin1em">
-          <p>
-            Note: changes may take up to an hour to appear on the site - we
-            cache pages to keep Crosshare fast!
-          </p>
+          <p>Note: changes may take up to an hour to appear on the site</p>
           <h3>Title</h3>
           <EditableText
             title="Title"
@@ -381,6 +379,64 @@ const PuzzleEditor = ({
             handleSubmit={(newTitle) =>
               updateDoc(getDocRef('c', puzzle.id), { t: newTitle })
             }
+          />
+          <label>
+            {/* <input
+              className="marginRight1em"
+              type="checkbox"
+              onChange={() => {
+                  setIsPrivateUntil(Date.now() + 24 * 60 * 60 * 1000);
+              }}
+            />{' '} */}
+            Published Date
+          </label>
+
+          {/**If its not private(its public) or
+           * the private until date has passed(now is greater then the private until date) */}
+          {puzzle.isPrivate === false &&
+          (!puzzle.isPrivateUntil || puzzle.isPrivateUntil < Date.now()) ? (
+            <p>
+              Edit Date {lightFormat(puzzle.publishTime, "M/d/y' at 'h:mma")} (
+              {
+                new Date(puzzle.publishTime)
+                  .toLocaleTimeString('en-us', { timeZoneName: 'short' })
+                  .split(' ')[2]
+              }
+              ):
+              <DateTimePicker
+                picked={puzzle.publishTime}
+                setPicked={(d) => {
+                  setPublishedDate(d.getTime());
+                }}
+              />
+            </p>
+          ) : (
+            <p>
+              Cannot edit published date, Puzzle not published yet. Please edit
+              privacy settings instead.
+            </p>
+          )}
+          <Button
+            className="marginRight1em"
+            text="Update Date"
+            disabled={puzzle.isPrivate !== false}
+            onClick={logAsyncErrors(async () => {
+              await updateDoc(getDocRef('c', puzzle.id), {
+                p: Timestamp.fromMillis(publishedDate),
+                pvu: Timestamp.fromMillis(publishedDate),
+              }).then(() => {
+                showSnackbar(
+                  'Date updated - it may take up to an hour for updates to be visible on the site.'
+                );
+              });
+            })}
+          />
+          <Button
+            text="Cancel"
+            disabled={puzzle.isPrivate !== false}
+            onClick={() => {
+              setPublishedDate(puzzle.publishTime);
+            }}
           />
           <h3>Clues</h3>
           <table className="width100">
@@ -551,9 +607,10 @@ const PuzzleEditor = ({
               Private
             </label>
           </p>
+          {/**removed the requirement to have the date  */}
           {puzzle.isPrivate === true ||
-          (puzzle.isPrivateUntil && puzzle.isPrivateUntil > Date.now()) ? (
-            <p>
+          puzzle.isPrivateUntil /**&& puzzle.isPrivateUntil > Date.now()*/ ? (
+            <div>
               <label>
                 <input
                   className="marginRight1em"
@@ -592,17 +649,13 @@ const PuzzleEditor = ({
               ) : (
                 ''
               )}
-            </p>
+            </div>
           ) : (
             <p>Private until is unavailable if a puzzle has ever been public</p>
           )}
           <Button
             className="marginRight1em"
             text="Update Privacy Settings"
-            disabled={
-              isPrivate === puzzle.isPrivate &&
-              isPrivateUntil === puzzle.isPrivateUntil
-            }
             onClick={logAsyncErrors(async () => {
               await updateDoc(getDocRef('c', puzzle.id), {
                 pv:
@@ -624,10 +677,6 @@ const PuzzleEditor = ({
           />
           <Button
             text="Cancel"
-            disabled={
-              isPrivate === puzzle.isPrivate &&
-              isPrivateUntil === puzzle.isPrivateUntil
-            }
             onClick={() => {
               setIsPrivate(puzzle.isPrivate);
               setIsPrivateUntil(puzzle.isPrivateUntil);
