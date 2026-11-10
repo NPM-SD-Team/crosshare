@@ -19,7 +19,6 @@ import {
   userIdToConstructorPageWithPatron,
 } from '../lib/serverOnly.js';
 import { withTranslation } from '../lib/translation.js';
-import { requiresAdmin } from '../components/AuthHelpers.js';
 
 interface ErrorProps {
   error: string;
@@ -76,14 +75,11 @@ const gssp: GetServerSideProps<PageProps> = async ({ res, params }) => {
     res.statusCode = 404;
     return { props: { error: 'Bad username' } };
   }
-
 };
 
 export const getServerSideProps = withTranslation(gssp);
 
-export default requiresAdmin(ConstructorPageHandler);
-
-function ConstructorPageHandler(props: PageProps) {
+export default function ConstructorPageHandler(props: PageProps) {
   const router = useRouter();
   useEffect(() => {
     if ('error' in props) {
