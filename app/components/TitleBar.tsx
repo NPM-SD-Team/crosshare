@@ -19,38 +19,40 @@ export default function TitleBar({
   const publicationDate = new Date(publishedAt);
 
   return (
-    <header className={styles.header}>
-      <div className={styles.brand}>
-        <Link
-          href="https://nebraskapublicmedia.org/"
-          aria-label="Go to the NPM home page"
-          className={styles.logoLink}
-        >
-          <img
-            src={withBasePath('/Logo.png')}
-            alt=""
-            width={36}
-            height={36}
-            className={styles.logo}
-          />
-        </Link>
-        <div className={styles.titleDetails}>
-          <h1 className={styles.title}>{title}</h1>
-          <p className={styles.author}>by {author}</p>
+    <>
+      <header className={styles.header}>
+        <div className={styles.brand}>
+          <Link
+            href="https://nebraskapublicmedia.org/"
+            aria-label="Go to the NPM home page"
+            className={styles.logoLink}
+          >
+            <img
+              src={withBasePath('/Logo.png')}
+              alt=""
+              width={36}
+              height={36}
+              className={styles.logo}
+            />
+          </Link>
+          <div className={styles.titleDetails}>
+            <h1 className={styles.title}>{title}</h1>
+            <p className={styles.author}>by {author}</p>
+          </div>
         </div>
-      </div>
 
-      <time
-        className={styles.publishedDate}
-        dateTime={publicationDate.toISOString()}
-      >
-        {publicationDate.toLocaleDateString(undefined, {
-          weekday: 'long',
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        })}
-      </time>
-    </header>
+        <time
+          className={styles.publishedDate}
+          dateTime={publicationDate.toISOString()}
+        >
+          {publicationDate.toLocaleDateString(undefined, {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </time>
+      </header>
+    </>
   );
 }

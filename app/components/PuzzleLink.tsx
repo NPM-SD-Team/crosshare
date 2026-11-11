@@ -10,7 +10,6 @@ import { PuzzleResult } from '../lib/types.js';
 import { clsx, logAsyncErrors, slugify, timeString } from '../lib/utils.js';
 import { AuthContext } from './AuthContext.js';
 import { Emoji } from './Emoji.js';
-import { FollowButton } from './FollowButton.js';
 import { PatronIcon, PuzzleSizeIcon } from './Icons.js';
 import { Link } from './Link.js';
 import { Markdown } from './Markdown.js';
@@ -96,7 +95,7 @@ const PuzzleLink = (props: {
       ) : (
         <Link
           noTargetBlank={props.noTargetBlank}
-          className={clsx(styles.linkColor, styles.icon)}
+          className={clsx(styles.np_link, styles.icon)}
           href={url}
         >
           <div className="positionRelative">
@@ -120,11 +119,11 @@ const PuzzleLink = (props: {
       <div className="flex1">
         <Link
           noTargetBlank={props.noTargetBlank}
-          className={styles.linkColor}
+          className={styles.np_link}
           href={url}
         >
           {props.compact ? (
-            <span className="marginBottom0">
+            <span className={styles.np_card__head}>
               {props.title}{' '}
               {!authored && play?.t ? (
                 play.f ? (
@@ -191,18 +190,18 @@ export const AuthorLink = ({
   isPatron: boolean;
 }) => {
   let link: ReactNode = authorName;
-  let followButton: ReactNode = <></>;
+  // let followButton: ReactNode = <></>;
   if (constructorPage) {
     const username = constructorPage.i;
     link = <Link href={'/' + username}>{constructorPage.n}</Link>;
   }
   if (constructorPage && showFollowButton) {
-    followButton = (
-      <>
-        {' '}
-        <FollowButton className={styles.follow} page={constructorPage} />
-      </>
-    );
+    // followButton = (
+    //   <>
+    //     {' '}
+    //     <FollowButton className={styles.follow} page={constructorPage} />
+    //   </>
+    // );
   }
   if (isPatron) {
     link = (
@@ -218,10 +217,10 @@ export const AuthorLink = ({
           By {guestConstructor}
         </Trans>{' '}
         ·{' '}
-        <Trans comment="The variable is the name of the user who published the puzzle">
-          Published by {link}
-        </Trans>
-        {followButton}
+        {/* <Trans comment="The variable is the name of the user who published the puzzle">
+        Published by {link}
+        </Trans> */}
+        {/* {followButton} */}
       </>
     );
   }
@@ -230,7 +229,7 @@ export const AuthorLink = ({
       <Trans comment="The variable is the name of the puzzle's constructor">
         By {link}
       </Trans>
-      {followButton}
+      {/* {followButton} */}
     </>
   );
 };
@@ -326,6 +325,265 @@ export const PuzzleResultLink = ({
     />
   );
   const date = (
+    <span className={styles.date}>
+      <PublishDate
+        useErrorColor
+        showPrivateStatus={!!props.showPrivateStatus}
+        isPrivate={puzzle.isPrivate}
+        isPrivateUntil={puzzle.isPrivateUntil}
+        publishTime={puzzle.publishTime}
+      />
+    </span>
+  );
+  const guestConstructor = puzzle.guestConstructor;
+  let contents: ReactNode = difficulty;
+  if (showDate && showAuthor) {
+    contents = (
+      <>
+        {date}
+        {difficulty} · {authorLink}
+      </>
+    );
+  } else if (puzzle.guestConstructor && showDate) {
+    contents = (
+      <>
+        {date}
+        {difficulty} ·{' '}
+        <Trans comment="The variable is the guest constructor's name">
+          By guest constructor {guestConstructor}
+        </Trans>{' '}
+      </>
+    );
+  } else if (showDate) {
+    contents = (
+      <>
+        {difficulty} · {date}
+      </>
+    );
+  } else if (showAuthor) {
+    contents = (
+      <>
+        {difficulty} · {authorLink}
+      </>
+    );
+  } else if (puzzle.guestConstructor) {
+    contents = (
+      <>
+        {difficulty} ·{' '}
+        <Trans comment="The variable is the guest constructor's name">
+          By guest constructor {guestConstructor}
+        </Trans>
+      </>
+    );
+  }
+  return (
+    <>
+      <PuzzleLink
+        fullWidth={fullWidth}
+        showingBlog={showBlogPost && puzzle.blogPostPreview ? true : false}
+        authorId={puzzle.authorId}
+        id={puzzle.id}
+        puzzleTitle={puzzle.title}
+        width={puzzle.size.cols}
+        height={puzzle.size.rows}
+        title={title ?? puzzle.title}
+        subTitle={title ? puzzle.title : undefined}
+        tags={(puzzle.userTags ?? []).concat(puzzle.autoTags ?? [])}
+        noTargetBlank={noTargetBlank}
+        fromEmbedPage={fromEmbedPage}
+        addQueryString={addQueryString}
+        {...props}
+      >
+        {contents}
+      </PuzzleLink>
+      {showBlogPost && puzzle.blogPostPreview ? (
+        <div className={styles.blog}>
+          <Markdown hast={puzzle.blogPostPreview} />
+        </div>
+      ) : (
+        ''
+      )}
+    </>
+  );
+};
+
+const PuzzleGhostLink = (props: {
+  fullWidth?: boolean;
+  showingBlog: boolean;
+  id: string;
+  authorId: string;
+  width?: number;
+  height?: number;
+  title: string;
+  subTitle?: string;
+  children?: ReactNode;
+  tags: string[];
+  filterTags: string[];
+  compact?: boolean;
+}) => {
+  const { user } = useContext(AuthContext);
+  const [play, setPlay] = useState<PlayWithoutUserT | null>(null);
+  const authored = user?.uid === props.authorId;
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function fetchData() {
+      const p = await getPossiblyStalePlay(user, props.id);
+      if (ignore) {
+        return;
+      }
+      setPlay(p);
+    }
+    logAsyncErrors(fetchData)();
+    return () => {
+      ignore = true;
+    };
+  }, [user, props.id]);
+
+  const filteredTags = props.tags.filter(
+    (t) =>
+      ![
+        'featured',
+        'dailymini',
+        'mini',
+        'midi',
+        'full',
+        'jumbo',
+        'rating-0-1200',
+        'rating-1200-1500',
+        'rating-1500-1800',
+        'rating-1800-up',
+      ]
+        .concat(props.filterTags)
+        .includes(t)
+  );
+
+  const completed = authored || play?.f;
+  const started = Boolean(play && play.t !== 0);
+  return (
+    <div
+      data-completed={completed}
+      data-started={started}
+      data-showing-blog={props.showingBlog}
+      data-full-width={props.fullWidth}
+      className={styles.link}
+    >
+      {props.compact ? (
+        ''
+      ) : (
+        <div className={clsx(styles.linkColorGhost, styles.icon)}>
+          <div className="positionRelative">
+            <PuzzleSizeIcon width={props.width} height={props.height} />
+            {completed ? (
+              <div className={styles.emoji}>
+                {authored ? (
+                  <Emoji title="Authored Puzzle" symbol="🖋️" />
+                ) : play?.ch ? (
+                  <Emoji title="Used helpers" symbol="😏" />
+                ) : (
+                  <Emoji title="Solved without helpers" symbol="🤓" />
+                )}
+              </div>
+            ) : (
+              ''
+            )}
+          </div>
+        </div>
+      )}
+      <div className="flex1">
+        {props.compact ? (
+          <span className="marginBottom0">
+            {props.title}{' '}
+            {!authored && play?.t ? (
+              play.f ? (
+                <i>({timeString(play.t, false)})</i>
+              ) : (
+                <i>
+                  (<Trans>unfinished</Trans>)
+                </i>
+              )
+            ) : (
+              ''
+            )}
+          </span>
+        ) : (
+          <>
+            <h3 className="marginBottom0">
+              {props.title}{' '}
+              {!authored && play?.t ? (
+                play.f ? (
+                  <i>({timeString(play.t, false)})</i>
+                ) : (
+                  <i>
+                    (<Trans>unfinished</Trans>)
+                  </i>
+                )
+              ) : (
+                ''
+              )}
+            </h3>
+            {props.subTitle ? (
+              <h4 className="marginBottom0">{props.subTitle}</h4>
+            ) : (
+              ''
+            )}
+          </>
+        )}
+
+        {props.compact ? (
+          <>&middot; {props.children}</>
+        ) : (
+          <p>{props.children}</p>
+        )}
+        {!props.compact && filteredTags.length ? (
+          <TagList className={styles.taglist} tags={filteredTags} link />
+        ) : (
+          ''
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const PuzzleResultGhostLink = ({
+  fullWidth,
+  puzzle,
+  showDate,
+  showBlogPost,
+  showAuthor,
+  constructorPage,
+  constructorIsPatron,
+  title,
+  ...props
+}: {
+  fullWidth?: boolean;
+  puzzle: LinkablePuzzle;
+  showDate?: boolean;
+  showBlogPost?: boolean;
+  showPrivateStatus?: boolean;
+  showAuthor: boolean;
+  title?: string;
+  constructorPage?: ConstructorPageBarebones | null;
+  constructorIsPatron: boolean;
+  filterTags: string[];
+  noTargetBlank?: boolean;
+  fromEmbedPage?: number;
+  addQueryString?: string;
+  compact?: boolean;
+}) => {
+  const difficulty = <DifficultyBadge puzzleRating={puzzle.rating} />;
+  const authorLink = (
+    <span className={styles.by}>
+      <AuthorLink
+        authorName={puzzle.authorName}
+        guestConstructor={puzzle.guestConstructor}
+        constructorPage={constructorPage ?? null}
+        isPatron={constructorIsPatron}
+      />
+    </span>
+  );
+  const date = (
     <PublishDate
       useErrorColor
       showPrivateStatus={!!props.showPrivateStatus}
@@ -376,24 +634,20 @@ export const PuzzleResultLink = ({
   }
   return (
     <>
-      <PuzzleLink
+      <PuzzleGhostLink
         fullWidth={fullWidth}
         showingBlog={showBlogPost && puzzle.blogPostPreview ? true : false}
         authorId={puzzle.authorId}
         id={puzzle.id}
-        puzzleTitle={puzzle.title}
         width={puzzle.size.cols}
         height={puzzle.size.rows}
         title={title ?? puzzle.title}
         subTitle={title ? puzzle.title : undefined}
         tags={(puzzle.userTags ?? []).concat(puzzle.autoTags ?? [])}
-        noTargetBlank={noTargetBlank}
-        fromEmbedPage={fromEmbedPage}
-        addQueryString={addQueryString}
         {...props}
       >
         {contents}
-      </PuzzleLink>
+      </PuzzleGhostLink>
       {showBlogPost && puzzle.blogPostPreview ? (
         <div className={styles.blog}>
           <Markdown hast={puzzle.blogPostPreview} />

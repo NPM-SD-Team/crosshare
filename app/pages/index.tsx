@@ -8,7 +8,11 @@ import { useContext } from 'react';
 import { AuthContext } from '../components/AuthContext.js';
 import { I18nTags } from '../components/I18nTags.js';
 import { Markdown } from '../components/Markdown.js';
-import { LinkablePuzzle, PuzzleResultLink } from '../components/PuzzleLink.js';
+import {
+  LinkablePuzzle,
+  PuzzleResultLink,
+  PuzzleResultGhostLink,
+} from '../components/PuzzleLink.js';
 import { DefaultTopBar } from '../components/TopBar.js';
 import ParentWebsiteHeader from '../components/ParentWebsiteHeader.js';
 import { UnfinishedPuzzleList } from '../components/UnfinishedPuzzleList.js';
@@ -106,6 +110,26 @@ export default function HomePage({
   //just the newsest puzzle out of the newest filtered list
   const todaysPuzzle = newest[0];
   const title = t`Daily Crossword Puzzles | Nebraska Public Media`;
+  const timestampMinus6Days = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  let NewestLastSixDays: HomepagePuz[] = [];
+  let OlderLastSixDays: HomepagePuz[] = [];
+  newest.forEach((puzzle) => {
+    console.log(
+      new Intl.DateTimeFormat('en-US').format(puzzle.publishTime) +
+        '>' +
+        new Intl.DateTimeFormat('en-US').format(timestampMinus6Days) +
+        '=' +
+        (puzzle.publishTime > timestampMinus6Days)
+    );
+    if (
+      puzzle.publishTime >= timestampMinus6Days ||
+      (puzzle.isPrivateUntil && puzzle.isPrivateUntil >= timestampMinus6Days)
+    ) {
+      NewestLastSixDays.push(puzzle);
+    } else {
+      OlderLastSixDays.push(puzzle);
+    }
+  });
   return (
     <>
       <Head>
@@ -113,8 +137,8 @@ export default function HomePage({
         <I18nTags locale={router.locale || 'en'} canonicalPath="/" />
       </Head>
       <div style={{ position: 'sticky', top: '0', zIndex: '99' }}>
-        <ParentWebsiteHeader />
         <DefaultTopBar />
+        <ParentWebsiteHeader />
       </div>
 
       <div className="margin1em">
@@ -165,17 +189,62 @@ export default function HomePage({
         <h2 className="marginBottom0">
           <Trans>Newest Puzzles</Trans>
         </h2>
-        {newest.map((p, i) => (
-          <PuzzleResultLink
-            key={i}
-            puzzle={p}
-            showDate={true}
-            constructorPage={p.constructorPage}
-            showAuthor={true}
-            constructorIsPatron={p.constructorIsPatron}
-            filterTags={[]}
-          />
-        ))}
+        <div className={styles.np_panel}>
+          {user && !user.isAnonymous
+            ? newest.map((p, i) => (
+                <div className={styles.np_card}>
+                  <PuzzleResultLink
+                    key={i}
+                    puzzle={p}
+                    showDate={true}
+                    constructorPage={p.constructorPage}
+                    showAuthor={true}
+                    constructorIsPatron={p.constructorIsPatron}
+                    filterTags={[]}
+                  />
+                </div>
+              ))
+            : NewestLastSixDays.map((p, i) => (
+                <div className={styles.np_card}>
+                  <PuzzleResultLink
+                    key={i}
+                    puzzle={p}
+                    showDate={true}
+                    constructorPage={p.constructorPage}
+                    showAuthor={true}
+                    constructorIsPatron={p.constructorIsPatron}
+                    filterTags={[]}
+                  />
+                </div>
+              ))}
+        </div>
+
+        {!user || user.isAnonymous ? (
+          <div className="margin2em0">
+            <h2 className="marginBottom0">
+              <a href="/account" target="_blank" rel="noopener noreferrer">
+                Create an account or login to see more
+              </a>
+            </h2>
+            <div className={styles.np_panel}>
+              {OlderLastSixDays.map((p, i) => (
+                <div className={styles.np_card}>
+                  <PuzzleResultGhostLink
+                    key={i}
+                    puzzle={p}
+                    showDate={true}
+                    constructorPage={p.constructorPage}
+                    showAuthor={true}
+                    constructorIsPatron={p.constructorIsPatron}
+                    filterTags={[]}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          ''
+        )}
         <hr className="margin2em0" />
       </div>
     </>

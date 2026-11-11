@@ -11,3 +11,38 @@ $keyboard-height: 164px;
 $slate-padding-small: 15px;
 $slate-padding-med: 50px;
 $slate-padding-large: 50px;
+
+:root {
+  --np-navy: #1c2366;
+  --np-navy-2: #3a479f;
+  --np-navy-light: #4a5dba;
+  --np-slate: #6676b3;
+  --np-muted: #5b6290;
+  --np-ink: #1b1a18;
+
+  --np-teal: #75bfc5;
+  --np-yellow: #ffd21f;
+  --np-yellow-hover: #ffe95c;
+  --np-success: #9cc58a;
+  --np-error: #f58674;
+
+  --np-white: #fff;
+  --np-cell: #e3e6eb;
+  --np-hover: #eef0f7;
+  --np-hairline: #d9dcea;
+
+  --np-grad: linear-gradient(90deg, #f26a3b 0%, #f5a623 55%, #f7cf2a 100%);
+  --np-grad-v: linear-gradient(180deg, #f26a3b, #f7cf2a);
+
+  --np-font: 'Segoe UI', 'Open Sans', Arimo, Arial, sans-serif;
+
+  --np-radius-sm: 6px;
+  --np-radius: 10px;
+  --np-radius-lg: 14px;
+
+  --np-shadow-sm: 3px 3px 0 var(--np-navy);
+  --np-shadow: 4px 4px 0 var(--np-navy);
+  --np-shadow-lg: 5px 6px 0 var(--np-navy);
+
+  --np-ease-pop: cubic-bezier(0.3, 1.4, 0.6, 1);
+}

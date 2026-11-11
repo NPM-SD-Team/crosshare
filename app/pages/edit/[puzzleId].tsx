@@ -419,7 +419,11 @@ const PuzzleEditor = ({
           <Button
             className="marginRight1em"
             text="Update Date"
-            disabled={puzzle.isPrivate !== false}
+            disabled={
+              puzzle.isPrivate !== false ||
+              (puzzle.isPrivateUntil !== null &&
+                puzzle.isPrivateUntil < Date.now())
+            }
             onClick={logAsyncErrors(async () => {
               await updateDoc(getDocRef('c', puzzle.id), {
                 p: Timestamp.fromMillis(publishedDate),

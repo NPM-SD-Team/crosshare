@@ -20,6 +20,7 @@ import {
   useState,
 } from 'react';
 import {
+  FaBackward,
   FaCheck,
   FaCog,
   FaComment,
@@ -1146,6 +1147,13 @@ export const Puzzle = ({
               ) : (
                 ''
               )}
+              <TopBarDropDownLink
+                icon={<FaBackward />}
+                text={t`Restart Puzzle`}
+                onClick={() => {
+                  setMuted(false);
+                }}
+              />
               {muted ? (
                 <TopBarDropDownLink
                   icon={<FaVolumeUp />}

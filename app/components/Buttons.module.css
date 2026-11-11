@@ -43,22 +43,28 @@
 }
 
 .btn {
-  max-width: 100%;
+  cursor: pointer;
 
-  /* create a small space when buttons wrap on 2 lines */
-  margin: 2px 0;
-  padding: 0.5em 1em;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
 
-  /* invisible border (will be colored on hover/focus) */
-  border: solid 1px transparent;
-  border-radius: 4px;
+  height: 46px;
+  padding: 0 22px;
+  border: 3px solid var(--np-navy);
+  border-radius: var(--np-radius);
 
-  line-height: 1.1;
-  color: var(--onlink);
-  text-align: center;
+  font: 600 17px/1 var(--np-font);
+  color: var(--np-navy);
 
-  background-color: var(--link);
-  box-shadow: 0 3px 5px rgb(0 0 0 / 50%);
+  background: var(--np-white);
+  box-shadow: var(--np-shadow);
+
+  transition:
+    transform 0.07s,
+    box-shadow 0.07s,
+    background 0.12s;
 }
 
 .btn[data-boring='true'] {
@@ -73,13 +79,18 @@
 }
 
 .btn:disabled {
-  border-color: var(--default-text);
-  color: var(--default-text);
-  background-color: transparent;
+  cursor: default;
+
+  transform: none;
+
+  opacity: 0.45;
+  background: var(--np-white);
+  box-shadow: none;
 }
 
 .btn:enabled:active {
-  transform: translateY(1px);
+  transform: translate(4px, 4px);
+  box-shadow: none;
 }
 
 @media (hover: hover) {
@@ -91,7 +102,7 @@
   .btn:hover {
     color: var(--onlink);
     text-decoration: none;
-    background-color: var(--link-hover);
+    background-color: var(--np-teal);
   }
 
   .btn:hover:disabled {

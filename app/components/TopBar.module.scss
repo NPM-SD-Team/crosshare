@@ -150,14 +150,16 @@
   height: 100%;
   margin: 0;
   padding: 0 0.45em;
-  border: none;
 
-  color: var(--onprimary);
-  text-decoration: none;
-  text-overflow: clip;
-  white-space: nowrap;
+  position: relative;
+  border: 0;
+  background: none;
+  color: #fff;
 
-  background-color: transparent;
+  font-size: 17px;
+  font-weight: 400;
+
+  line-height: 1.2;
 }
 
 //dark color for if its clicked on rn

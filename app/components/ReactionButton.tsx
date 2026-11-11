@@ -81,6 +81,7 @@ function ToolTip(props: {
       parts.push(`${rest} other${rest > 1 ? 's' : ''}`);
     }
   }
+
   return (
     <>
       Liked by{' '}
