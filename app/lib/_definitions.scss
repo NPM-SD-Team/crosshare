@@ -36,6 +36,9 @@ $slate-padding-large: 50px;
 
   --np-font: 'Segoe UI', 'Open Sans', Arimo, Arial, sans-serif;
 
+  /* puzzle card thumbnail (PuzzleSizeIcon is sized in em, so this is its width) */
+  --np-thumb: 5.75rem;
+
   --np-radius-sm: 6px;
   --np-radius: 10px;
   --np-radius-lg: 14px;

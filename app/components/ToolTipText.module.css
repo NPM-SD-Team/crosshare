@@ -12,8 +12,12 @@
   display: block;
 
   max-width: 30em;
-  padding: 10px;
-  border-radius: 5px;
+  /* padding: 10px; */
+  padding: 4px 10px;
+  /* border: 1px solid var(--np-navy); */
+  border: 2px solid var(--np-navy);
+  /* border-radius: 5px; */
+  border-radius: var(--np-radius-sm);
 
   color: var(--text);
   text-align: center;

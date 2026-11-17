@@ -665,3 +665,91 @@ export const PuzzleSizeIcon = (props: { width?: number; height?: number }) => {
     </svg>
   );
 };
+
+/*
+ * Grid + "5x5" badge icon. To swap to it: uncomment this block and comment out
+ * the PuzzleSizeIcon above, then rename PuzzleSizeIconGrid to PuzzleSizeIcon.
+ *
+const MAX_DRAWN_CELLS = 25;
+
+export const PuzzleSizeIconGrid = (props: { width?: number; height?: number }) => {
+  const cols = Math.min(props.width ?? 0, MAX_DRAWN_CELLS);
+  const rows = Math.min(props.height ?? 0, MAX_DRAWN_CELLS);
+  const hasSize = cols > 0 && rows > 0;
+
+  // Grid area inside the navy tile
+  const inset = 9;
+  const area = 74;
+  const step = hasSize ? area / Math.max(cols, rows) : 0;
+  const gap = step * 0.14;
+  const offsetX = inset + (area - step * cols) / 2;
+  const offsetY = inset + (area - step * rows) / 2;
+
+  const cells = [];
+  if (hasSize) {
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        cells.push(
+          <rect
+            key={`${r}-${c}`}
+            x={offsetX + c * step + gap / 2}
+            y={offsetY + r * step + gap / 2}
+            width={step - gap}
+            height={step - gap}
+            rx={Math.min(1.5, step * 0.1)}
+            style={{ fill: 'var(--np-cell, #e3e6eb)' }}
+          />
+        );
+      }
+    }
+  }
+
+  const label =
+    props.width || props.height
+      ? `${props.width ?? '?'}\u00d7${props.height ?? '?'}`
+      : '';
+  const badgeW = 8 + label.length * 7;
+  const badgeH = 18;
+
+  return (
+    <svg
+      className="verticalAlignTop"
+      width="1em"
+      height="1em"
+      viewBox="0 0 100 100"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+    >
+      <rect x="1" y="1" width="91" height="91" rx="8" ry="8" />
+      {cells}
+      {label ? (
+        <g>
+          <rect
+            x={99 - badgeW}
+            y={99 - badgeH}
+            width={badgeW}
+            height={badgeH}
+            rx="4"
+            ry="4"
+            fill="#fff"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
+          <text
+            x={99 - badgeW / 2}
+            y={99 - badgeH / 2}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="12"
+            fontWeight="700"
+          >
+            {label}
+          </text>
+        </g>
+      ) : (
+        ''
+      )}
+    </svg>
+  );
+};
+ */

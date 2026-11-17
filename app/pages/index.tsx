@@ -15,6 +15,7 @@ import {
 } from '../components/PuzzleLink.js';
 import { DefaultTopBar } from '../components/TopBar.js';
 import ParentWebsiteHeader from '../components/ParentWebsiteHeader.js';
+// import { PuzzleCalendar } from '../components/PuzzleCalendar.js';
 import { UnfinishedPuzzleList } from '../components/UnfinishedPuzzleList.js';
 import { ArticleT, validate } from '../lib/article.js';
 import { ConstructorPageBarebones } from '../lib/constructorPage.js';
@@ -186,8 +187,15 @@ export default function HomePage({
           ''
         )}
         <hr className="margin2em0" />
-        <h2 className="marginBottom0">
+        {/* Display only for now: shows sample data until `days` is passed in */}
+        {/* <div className={styles.np_calendarSection}>
+          <PuzzleCalendar />
+        </div> */}
+        {/* <h2 className="marginBottom0">
           <Trans>Newest Puzzles</Trans>
+        </h2> */}
+        <h2 className={styles.np_sectionTitle}>
+          <Trans>Recent Puzzles</Trans>
         </h2>
         <div className={styles.np_panel}>
           {user && !user.isAnonymous
