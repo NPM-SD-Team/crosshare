@@ -114,13 +114,6 @@ export default function HomePage({
   let NewestLastSixDays: HomepagePuz[] = [];
   let OlderLastSixDays: HomepagePuz[] = [];
   newest.forEach((puzzle) => {
-    console.log(
-      new Intl.DateTimeFormat('en-US').format(puzzle.publishTime) +
-        '>' +
-        new Intl.DateTimeFormat('en-US').format(timestampMinus6Days) +
-        '=' +
-        (puzzle.publishTime > timestampMinus6Days)
-    );
     if (
       puzzle.publishTime >= timestampMinus6Days ||
       (puzzle.isPrivateUntil && puzzle.isPrivateUntil >= timestampMinus6Days)

@@ -307,6 +307,7 @@ export const Puzzle = ({
     autocheck: false,
     dismissedKeepTrying: false,
     dismissedSuccess: false,
+    restartVersion: 0,
     moderating: false,
     showingEmbedOverlay: false,
     displaySeconds: play ? play.t : 0,
@@ -413,6 +414,10 @@ export const Puzzle = ({
     dispatch({ type: 'PAUSEACTION' });
     cachePlayForUser(props.user);
     writePlayToDBIfNeeded();
+  }
+
+  function restartCache() {
+    dispatch({ type: 'RESTART' });
   }
   // Pause when page goes out of focus
   function autoPause() {
@@ -591,6 +596,133 @@ export const Puzzle = ({
       state.contestPriorSubmissions,
     ]
   );
+
+  // const RestartCachedPlayForUser = useCallback(
+  //   (user: User | undefined) => {
+
+  //     //reset the memory
+
+  //     // state.grid.cells.forEach((_cell, i) => {
+  //     //   if (state.grid.cells[i] !== BLOCK) {
+  //     //     state.grid.cells[i] = EMPTY;
+  //     //   }
+  //     // });
+  //     // if (inReplay) {
+  //     //     const play: PlayWithoutUserT | null | undefined = getPlayFromCache(user, puzzle.id);
+  //     //     if (play !== null && play !== undefined && play.t !== undefined) {
+  //     //       playTime = play?.t;
+  //     //     }
+  //     // }
+
+  //     //sends a signal to puzzleReducer.ts(in the reducer folder) which is the regular reducer flow,
+  //     // this will properly update the board like the rest of the functions
+
+  //   },
+  //   [
+  //     state.downsOnly,
+  //     state.loadedPlayState,
+  //     puzzle.id,
+  //     state.cellsEverMarkedWrong,
+  //     state.cellsIterationCount,
+  //     state.cellsUpdatedAt,
+  //     state.didCheat,
+  //     state.grid.cells,
+  //     state.revealedCells,
+  //     state.success,
+  //     state.verifiedCells,
+  //     state.wrongCells,
+  //     state.draftCells,
+  //     puzzle.title,
+  //     state.bankedSeconds,
+  //     state.currentTimeWindowStart,
+  //     state.settingsOpenCurrently,
+  //     state.contestSubmission,
+  //     state.contestSubmitTime,
+  //     state.contestEmail,
+  //     state.contestDisplayName,
+  //     state.contestRevealed,
+  //     state.contestPriorSubmissions,
+  //   ]
+  // );
+
+  useEffect(() => {
+    if (state.restartVersion === 0) return;
+    const updatedAt = Timestamp.now();
+    const playTime =
+      state.currentTimeWindowStart === 0
+        ? state.bankedSeconds
+        : state.bankedSeconds +
+          (new Date().getTime() - state.currentTimeWindowStart) / 1000;
+
+    const playForUser: PlayWithoutUserT = {
+      c: puzzle.id,
+      n: puzzle.title,
+      ua: updatedAt,
+      g: Array.from(state.grid.cells),
+      ct: Array.from(state.cellsUpdatedAt),
+      uc: Array.from(state.cellsIterationCount),
+      vc: Array.from(state.verifiedCells),
+      wc: Array.from(state.wrongCells),
+      we: Array.from(state.cellsEverMarkedWrong),
+      rc: Array.from(state.revealedCells),
+      dc: Array.from(state.draftCells),
+      t: playTime,
+      ch: state.didCheat,
+      do: state.downsOnly,
+      f: state.success,
+      ...(state.contestRevealed && {
+        ct_rv: state.contestRevealed,
+        ct_t:
+          state.contestSubmitTime !== undefined
+            ? Timestamp.fromMillis(state.contestSubmitTime)
+            : undefined,
+        ct_n: state.contestDisplayName,
+      }),
+      ...(state.contestSubmission && {
+        ct_sub: state.contestSubmission,
+        ct_pr_subs: state.contestPriorSubmissions ?? [],
+        ct_t:
+          state.contestSubmitTime !== undefined
+            ? Timestamp.fromMillis(state.contestSubmitTime)
+            : undefined,
+        ct_n: state.contestDisplayName,
+        ...(state.contestEmail && {
+          ct_em: state.contestEmail,
+        }),
+      }),
+    };
+    console.log('Reset Puzzle, sending cache');
+    cachePlay(user, puzzle.id, playForUser);
+    if (user) {
+      console.log('Puzzle reset sending to db');
+      writePlayToDB(user, puzzle.id);
+    }
+  }, [
+    state.restartVersion,
+    state.downsOnly,
+    state.loadedPlayState,
+    puzzle.id,
+    state.cellsEverMarkedWrong,
+    state.cellsIterationCount,
+    state.cellsUpdatedAt,
+    state.didCheat,
+    state.grid.cells,
+    state.revealedCells,
+    state.success,
+    state.verifiedCells,
+    state.wrongCells,
+    state.draftCells,
+    puzzle.title,
+    state.bankedSeconds,
+    state.currentTimeWindowStart,
+    state.settingsOpenCurrently,
+    state.contestSubmission,
+    state.contestSubmitTime,
+    state.contestEmail,
+    state.contestDisplayName,
+    state.contestRevealed,
+    state.contestPriorSubmissions,
+  ]);
 
   useEffect(() => {
     cachePlayForUser(props.user);
@@ -1151,7 +1283,7 @@ export const Puzzle = ({
                 icon={<FaBackward />}
                 text={t`Restart Puzzle`}
                 onClick={() => {
-                  setMuted(false);
+                  restartCache();
                 }}
               />
               {muted ? (

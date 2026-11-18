@@ -1,9 +1,16 @@
 import { PlayWithoutUserT } from '../lib/dbtypes.js';
 import { AccountPrefsFlagsT } from '../lib/prefs.js';
-import { CheatUnit, Direction, KeyK, NonEmptyArray } from '../lib/types.js';
+import {
+  BLOCK,
+  CheatUnit,
+  Direction,
+  KeyK,
+  NonEmptyArray,
+} from '../lib/types.js';
 import {
   CluedGrid,
   advanceTo,
+  fromCells,
   moveDown,
   moveLeft,
   moveRight,
@@ -365,6 +372,32 @@ export function puzzleReducer(
   }
   if (action.type === 'TOGGLEEMBEDOVERLAY') {
     return { ...state, showingEmbedOverlay: !state.showingEmbedOverlay };
+  }
+  if (action.type === 'RESTART') {
+    const cells = state.grid.cells.map((s: string) =>
+      s === BLOCK ? BLOCK : ' '
+    );
+    return {
+      ...state,
+      wasEntryClick: false,
+      active: { col: 0, row: 0, dir: Direction.Across },
+      grid: fromCells({ ...state.grid, cells }),
+      showExtraKeyLayout: false,
+      verifiedCells: new Set<number>([]),
+      wrongCells: new Set<number>([]),
+      revealedCells: new Set<number>([]),
+      draftCells: new Set<number>([]),
+      draftMode: false,
+      downsOnly: false,
+      isEnteringRebus: false,
+      rebusValue: '',
+      success: false,
+      ranSuccessEffects: false,
+      filled: false,
+      autocheck: false,
+      dismissedKeepTrying: false,
+      dismissedSuccess: false,
+    };
   }
   return state;
 }
