@@ -13,6 +13,7 @@ import {
   PuzzleResultLink,
   PuzzleResultGhostLink,
 } from '../components/PuzzleLink.js';
+import { DailyPuzzle } from '../components/DailyPuzzle.js';
 import { DefaultTopBar } from '../components/TopBar.js';
 import ParentWebsiteHeader from '../components/ParentWebsiteHeader.js';
 // import { PuzzleCalendar } from '../components/PuzzleCalendar.js';
@@ -109,7 +110,8 @@ export default function HomePage({
   const router = useRouter();
   const { user } = useContext(AuthContext);
   //just the newsest puzzle out of the newest filtered list
-  const todaysPuzzle = newest[0];
+  // (unused while <DailyPuzzle /> shows sample data; uncomment with the old block)
+  // const todaysPuzzle = newest[0];
   const title = t`Daily Crossword Puzzles | Nebraska Public Media`;
   const timestampMinus6Days = Date.now() - 7 * 24 * 60 * 60 * 1000;
   let NewestLastSixDays: HomepagePuz[] = [];
@@ -155,105 +157,114 @@ export default function HomePage({
         ) : (
           ''
         )}
-        <div className="marginBottom1em">
-          {todaysPuzzle ? (
-            <div>
-              <h2>
-                {/*This is the type of ' you can use in html code*/}
-                <Trans>Today&apos;s Puzzle</Trans>
+        {/* caps the page content at 3 puzzle cards across and centers it */}
+        <div className={styles.np_container}>
+          <div className="marginBottom1em">
+            {/* Old Today's Puzzle (swap back by uncommenting and removing <DailyPuzzle />)
+            {todaysPuzzle ? (
+              <div>
+                <h2>
+                  <Trans>Today&apos;s Puzzle</Trans>
+                </h2>
+                <PuzzleResultLink
+                  fullWidth
+                  puzzle={todaysPuzzle}
+                  showAuthor={true}
+                  constructorPage={todaysPuzzle.constructorPage}
+                  constructorIsPatron={todaysPuzzle.constructorIsPatron}
+                  filterTags={[]}
+                />
+              </div>
+            ) : (
+              ''
+            )}
+            */}
+            {/* Display only for now: shows sample data until `puzzle` is passed in */}
+            <h2 className={styles.np_sectionTitle}>
+              <Trans>Today&apos;s Puzzle</Trans>
+            </h2>
+            <DailyPuzzle />
+            {/* <div className="flex50">
+              <CreateShareSection halfWidth={true} />
+            </div> */}
+          </div>
+          {user && !user.isAnonymous ? (
+            <>
+              <hr className="margin2em0" />
+              <UnfinishedPuzzleList user={user} />
+            </>
+          ) : (
+            ''
+          )}
+          <hr className="margin2em0" />
+          {/* Display only for now: shows sample data until `days` is passed in */}
+          {/* <div className={styles.np_calendarSection}>
+            <PuzzleCalendar />
+          </div> */}
+          {/* <h2 className="marginBottom0">
+            <Trans>Newest Puzzles</Trans>
+          </h2> */}
+          <h2 className={styles.np_sectionTitle}>
+            <Trans>Recent Puzzles</Trans>
+          </h2>
+          <div className={styles.np_panel}>
+            {user && !user.isAnonymous
+              ? newest.map((p, i) => (
+                  <div className={styles.np_card}>
+                    <PuzzleResultLink
+                      key={i}
+                      puzzle={p}
+                      showDate={true}
+                      constructorPage={p.constructorPage}
+                      showAuthor={true}
+                      constructorIsPatron={p.constructorIsPatron}
+                      filterTags={[]}
+                    />
+                  </div>
+                ))
+              : NewestLastSixDays.map((p, i) => (
+                  <div className={styles.np_card}>
+                    <PuzzleResultLink
+                      key={i}
+                      puzzle={p}
+                      showDate={true}
+                      constructorPage={p.constructorPage}
+                      showAuthor={true}
+                      constructorIsPatron={p.constructorIsPatron}
+                      filterTags={[]}
+                    />
+                  </div>
+                ))}
+          </div>
+
+          {!user || user.isAnonymous ? (
+            <div className="margin2em0">
+              <h2 className="marginBottom0">
+                <a href="/account" target="_blank" rel="noopener noreferrer">
+                  Create an account or login to see more
+                </a>
               </h2>
-              <PuzzleResultLink
-                fullWidth
-                puzzle={todaysPuzzle}
-                showAuthor={true}
-                constructorPage={todaysPuzzle.constructorPage}
-                constructorIsPatron={todaysPuzzle.constructorIsPatron}
-                filterTags={[]}
-              />
+              <div className={styles.np_panel}>
+                {OlderLastSixDays.map((p, i) => (
+                  <div className={styles.np_card}>
+                    <PuzzleResultGhostLink
+                      key={i}
+                      puzzle={p}
+                      showDate={true}
+                      constructorPage={p.constructorPage}
+                      showAuthor={true}
+                      constructorIsPatron={p.constructorIsPatron}
+                      filterTags={[]}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             ''
           )}
-          {/* <div className="flex50">
-            <CreateShareSection halfWidth={true} />
-          </div> */}
+          <hr className="margin2em0" />
         </div>
-        {user && !user.isAnonymous ? (
-          <>
-            <hr className="margin2em0" />
-            <UnfinishedPuzzleList user={user} />
-          </>
-        ) : (
-          ''
-        )}
-        <hr className="margin2em0" />
-        {/* Display only for now: shows sample data until `days` is passed in */}
-        {/* <div className={styles.np_calendarSection}>
-          <PuzzleCalendar />
-        </div> */}
-        {/* <h2 className="marginBottom0">
-          <Trans>Newest Puzzles</Trans>
-        </h2> */}
-        <h2 className={styles.np_sectionTitle}>
-          <Trans>Recent Puzzles</Trans>
-        </h2>
-        <div className={styles.np_panel}>
-          {user && !user.isAnonymous
-            ? newest.map((p, i) => (
-                <div className={styles.np_card}>
-                  <PuzzleResultLink
-                    key={i}
-                    puzzle={p}
-                    showDate={true}
-                    constructorPage={p.constructorPage}
-                    showAuthor={true}
-                    constructorIsPatron={p.constructorIsPatron}
-                    filterTags={[]}
-                  />
-                </div>
-              ))
-            : NewestLastSixDays.map((p, i) => (
-                <div className={styles.np_card}>
-                  <PuzzleResultLink
-                    key={i}
-                    puzzle={p}
-                    showDate={true}
-                    constructorPage={p.constructorPage}
-                    showAuthor={true}
-                    constructorIsPatron={p.constructorIsPatron}
-                    filterTags={[]}
-                  />
-                </div>
-              ))}
-        </div>
-
-        {!user || user.isAnonymous ? (
-          <div className="margin2em0">
-            <h2 className="marginBottom0">
-              <a href="/account" target="_blank" rel="noopener noreferrer">
-                Create an account or login to see more
-              </a>
-            </h2>
-            <div className={styles.np_panel}>
-              {OlderLastSixDays.map((p, i) => (
-                <div className={styles.np_card}>
-                  <PuzzleResultGhostLink
-                    key={i}
-                    puzzle={p}
-                    showDate={true}
-                    constructorPage={p.constructorPage}
-                    showAuthor={true}
-                    constructorIsPatron={p.constructorIsPatron}
-                    filterTags={[]}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          ''
-        )}
-        <hr className="margin2em0" />
       </div>
     </>
   );

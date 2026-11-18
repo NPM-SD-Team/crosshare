@@ -1,0 +1,197 @@
+@use '../lib/definitions' as *;
+
+/* Daily puzzle feature card. Colors come from the --np-* tokens in lib/_definitions.scss */
+
+.card {
+  --dp-board: #2e3a94;
+  --dp-board-shadow: #161c55;
+
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  align-items: center;
+
+  /* matches the width of the card in dailyPuzzle_1.png */
+  max-width: 780px;
+  padding: 24px;
+  border: 4px solid var(--np-navy);
+  border-radius: var(--np-radius-lg);
+
+  font-family: var(--np-font);
+  color: var(--np-navy);
+
+  background: var(--np-white);
+  box-shadow: var(--np-shadow-lg);
+}
+
+/* stylelint-disable-next-line media-query-no-invalid */
+@media ($small-and-up) {
+  .card {
+    flex-direction: row;
+    gap: 52px;
+    align-items: center;
+    padding: 44px;
+  }
+}
+
+/* grid preview */
+.board {
+  display: grid;
+  flex-shrink: 0;
+  gap: 3px;
+
+  width: 100%;
+  max-width: 270px;
+
+  /* padding: 3px; */
+  padding: 6px;
+  border-radius: var(--np-radius-sm);
+
+  background: var(--dp-board);
+  box-shadow: 5px 6px 0 var(--dp-board-shadow);
+}
+
+.block,
+.cell {
+  aspect-ratio: 1;
+}
+
+.block {
+  background: var(--dp-board);
+}
+
+.cell {
+  position: relative;
+  background: var(--np-cell);
+}
+
+.cell[data-highlighted='true'] {
+  background: var(--np-teal);
+}
+
+.cell[data-active='true'] {
+  background: var(--np-yellow);
+}
+
+.cellNum {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* text side */
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.topRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  padding: 3px 8px;
+  border-radius: 4px;
+
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  background: var(--np-yellow);
+}
+
+.date {
+  font-size: 1.35rem;
+}
+
+.title {
+  margin: 14px 0 6px;
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.by {
+  margin: 0 0 18px;
+  font-size: 0.95rem;
+}
+
+.clue {
+  margin-bottom: 20px;
+  padding: 12px 18px;
+  border: 3px solid var(--np-navy);
+  border-radius: var(--np-radius);
+}
+
+.clueLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.clueText {
+  margin-top: 2px;
+  font-size: 1.05rem;
+}
+
+/* buttons */
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.play,
+.print {
+  cursor: pointer;
+
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+
+  padding: 10px 18px;
+  border: 3px solid var(--np-navy);
+  border-radius: var(--np-radius-sm);
+
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--np-navy);
+
+  box-shadow: var(--np-shadow-sm);
+
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+.play {
+  padding-left: 22px;
+  background: var(--np-yellow);
+}
+
+.play:hover {
+  background: var(--np-yellow-hover);
+}
+
+.print {
+  background: var(--np-white);
+}
+
+.print:hover {
+  background: var(--np-hover);
+}
+
+.play:hover,
+.print:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--np-shadow);
+}
