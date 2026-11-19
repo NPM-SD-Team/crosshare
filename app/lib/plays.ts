@@ -35,8 +35,11 @@ export function resetMemoryStore() {
 function getStorageKey(user: User | undefined) {
   return user ? 'plays/' + user.uid : 'plays/logged-out';
 }
+export function getStorageKeyReplays(user: User | undefined) {
+  return user ? 'replays/' + user.uid : 'replays/logged-out';
+}
 
-function getStore(storageKey: string): PlayMapT {
+export function getStore(storageKey: string): PlayMapT {
   const store = memoryStore[storageKey];
   if (store) {
     return store.data;
@@ -53,6 +56,13 @@ export function getPlayFromCache(
   user: User | undefined,
   puzzleId: string
 ): PlayWithoutUserT | null | undefined {
+  const replayStorageKey = getStorageKeyReplays(user);
+  const storeReplay = getStore(replayStorageKey);
+  const replay = storeReplay[puzzleId];
+  //if there is a replay stored then return that one instead
+  if (replay !== undefined) {
+    return replay;
+  }
   const storageKey = getStorageKey(user);
   const store = getStore(storageKey);
   return store[puzzleId];
@@ -125,9 +135,11 @@ export function cachePlay(
   user: User | undefined,
   puzzleId: string,
   play: PlayWithoutUserT | null,
+  isReplay?: boolean,
   isClean?: boolean
 ): void {
-  const storageKey = getStorageKey(user);
+  const storageKey =
+    isReplay === true ? getStorageKeyReplays(user) : getStorageKey(user);
   const store = getStore(storageKey);
 
   function omitUa(p: PlayWithoutUserT | null) {

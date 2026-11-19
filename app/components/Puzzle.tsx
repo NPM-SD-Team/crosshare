@@ -51,7 +51,14 @@ import {
 import { useMatchMedia, usePersistedBoolean } from '../lib/hooks.js';
 import { removeSpoilers } from '../lib/markdown/markdown.js';
 import { isNewPuzzleNotification } from '../lib/notificationTypes.js';
-import { cachePlay, isDirty, writePlayToDB } from '../lib/plays.js';
+import {
+  cachePlay,
+  isDirty,
+  writePlayToDB,
+  getPlayFromCache,
+  getStorageKeyReplays,
+  getStore,
+} from '../lib/plays.js';
 import { PuzzlePageResultProps } from '../lib/serverOnly.js';
 import { SMALL_AND_UP_RULES } from '../lib/style.js';
 import { Timestamp } from '../lib/timestamp.js';
@@ -525,12 +532,21 @@ export const Puzzle = ({
         return;
       }
       const updatedAt = Timestamp.now();
-      const playTime =
+      let playTime =
         state.currentTimeWindowStart === 0
           ? state.bankedSeconds
           : state.bankedSeconds +
             (new Date().getTime() - state.currentTimeWindowStart) / 1000;
 
+      const storageKey = getStorageKeyReplays(user);
+      const store = getStore(storageKey);
+
+      if (store[puzzle.id] !== undefined) {
+        const play = getPlayFromCache(user, puzzle.id);
+        if (play !== null && play !== undefined && play.t !== undefined) {
+          playTime = play.t;
+        }
+      }
       const playForUser: PlayWithoutUserT = {
         c: puzzle.id,
         n: puzzle.title,
@@ -648,12 +664,22 @@ export const Puzzle = ({
   useEffect(() => {
     if (state.restartVersion === 0) return;
     const updatedAt = Timestamp.now();
-    const playTime =
+
+    let playTime =
       state.currentTimeWindowStart === 0
         ? state.bankedSeconds
         : state.bankedSeconds +
           (new Date().getTime() - state.currentTimeWindowStart) / 1000;
 
+    const storageKey = getStorageKeyReplays(user);
+    const store = getStore(storageKey);
+
+    if (store[puzzle.id] !== undefined) {
+      const play = getPlayFromCache(user, puzzle.id);
+      if (play !== null && play !== undefined && play.t !== undefined) {
+        playTime = play.t;
+      }
+    }
     const playForUser: PlayWithoutUserT = {
       c: puzzle.id,
       n: puzzle.title,

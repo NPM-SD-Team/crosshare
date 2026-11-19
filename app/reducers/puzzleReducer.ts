@@ -42,6 +42,7 @@ export interface PuzzleState extends GridInterfaceState {
   autocheck: boolean;
   dismissedKeepTrying: boolean;
   dismissedSuccess: boolean;
+  restartVersion: number;
   moderating: boolean;
   showingEmbedOverlay: boolean;
   didCheat: boolean;
@@ -373,6 +374,9 @@ export function puzzleReducer(
   if (action.type === 'TOGGLEEMBEDOVERLAY') {
     return { ...state, showingEmbedOverlay: !state.showingEmbedOverlay };
   }
+  if (action.type === '') {
+    return { ...state };
+  }
   if (action.type === 'RESTART') {
     const cells = state.grid.cells.map((s: string) =>
       s === BLOCK ? BLOCK : ' '
@@ -397,6 +401,7 @@ export function puzzleReducer(
       autocheck: false,
       dismissedKeepTrying: false,
       dismissedSuccess: false,
+      restartVersion: state.restartVersion + 1,
     };
   }
   return state;
