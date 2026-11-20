@@ -25,6 +25,7 @@
 
 .np_link {
   color: var(--np-navy);
+  /* width: 30%; */
   font-weight: 600;
   text-decoration: underline 2px var(--np-teal);
   text-underline-offset: 3px;
@@ -34,12 +35,47 @@
   text-decoration-color: var(--np-navy);
 }
 
-.linkColorGhost {
-  color: #000000;
+/*
+ * Hovering either the thumbnail or the title highlights both
+ * (they are two separate links, so the shared parent watches for hover).
+ */
+.link:has(.np_link:hover) .np_link {
+  /* color: var(--np-navy-2);
+  text-decoration-color: var(--np-navy); */
+  color: var(--np-teal);
+  text-decoration-color: var(--np-teal);
 }
 
-.linkColorGhost:hover {
+.link[data-started='true']:has(.np_link:hover) .np_link {
+  color: var(--error-hover);
+}
+
+.link[data-completed='true']:has(.np_link:hover) .np_link {
+  color: var(--text);
+}
+
+.linkColorGhost {
+  /* color: #000000; */
+  color: var(--np-navy);
+}
+
+/* .linkColorGhost:hover {
   color: rgb(34, 34, 46);
+} */
+
+/* ghost (not clickable) cards show only the icon and title */
+.linkColorGhost + :global(.flex1) > :not(h3, h4) {
+  display: none;
+}
+
+/* ghost (not clickable) title, styled like the normal .np_link title */
+.linkColorGhost + :global(.flex1) > h3 {
+  font-size: 1.2rem;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--np-navy);
+  text-decoration: underline 2px var(--np-teal);
+  text-underline-offset: 3px;
 }
 
 .link[data-started='true'] .np_link {
@@ -59,9 +95,31 @@
 }
 
 .icon {
-  margin-right: 0.3em;
-  font-size: 4em;
-  line-height: 1em;
+  /* margin-right: 0.3rem;
+  font-size: 8rem;
+  line-height: 1rem; */
+  flex-shrink: 0;
+  margin-right: 18px;
+  font-size: var(--np-thumb);
+  line-height: 0;
+  text-decoration: none;
+}
+
+/* title */
+.np_link h3 {
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+/* byline: "● · By Author", with the publish date as a quiet line under it */
+.link p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.3em;
+  margin: 6px 0 10px;
+  font-size: 15px;
+  color: var(--np-ink);
 }
 
 .emoji {
@@ -71,7 +129,8 @@
 
   width: 1.66em;
 
-  font-size: 0.6em;
+  /* font-size: 0.6em; */
+  font-size: 0.32em;
   text-align: center;
   text-shadow:
     2px 0 0 white,
@@ -81,7 +140,8 @@
 }
 
 .taglist {
-  font-size: 0.9em;
+  /* font-size: 0.9em; */
+  font-size: 0.85em;
 }
 
 .blog {
@@ -104,9 +164,14 @@
 }
 
 .date {
-  margin: 6px 0 0;
+  /* margin: 6px 0 0;
   font-size: 14px;
-  color: var(--muted);
+  color: var(--muted); */
+  order: 2;
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--np-muted);
   display: flex;
   align-items: center;
   gap: 7px;

@@ -82,6 +82,9 @@ export const ToolTipText = (props: {
               ref={arrowRef}
               context={context}
               fill={'var(--bg)'}
+              // navy outline to match the tooltip's border (remove these two to undo)
+              stroke={'var(--np-navy)'}
+              strokeWidth={2}
             />
             {props.tooltip}
           </span>
