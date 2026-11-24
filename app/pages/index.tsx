@@ -1,6 +1,7 @@
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import type { Root } from 'hast';
+import { DailyPuzzlePuzzle, puzzleFromDB } from '../lib/types.js';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -25,7 +26,7 @@ import { getCollection } from '../lib/firebaseAdminWrapper.js';
 import { markdownToHast } from '../lib/markdown/markdown.js';
 import { paginatedPuzzles } from '../lib/paginatedPuzzles.js';
 import { isUserPatron } from '../lib/patron.js';
-import { userIdToPage } from '../lib/serverOnly.js';
+import { getPuzzle, userIdToPage } from '../lib/serverOnly.js';
 import { withTranslation } from '../lib/translation.js';
 import { PAGE_SIZE } from './featured/[pageNumber].js';
 // eslint-disable-next-line css-modules/no-unused-class
@@ -37,6 +38,7 @@ type HomepagePuz = LinkablePuzzle & {
 };
 
 interface HomePageProps {
+  dailyPuzzle: DailyPuzzlePuzzle | null;
   newest: HomepagePuz[];
   announcement: { title: string; body: Root } | null;
 }
@@ -91,8 +93,29 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
   );
 
   res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
+
+  const todaysPuzzle = newest[0];
+  let dailyPuzzle: DailyPuzzlePuzzle | null = null;
+
+  //get the puzzle data
+  if (todaysPuzzle) {
+    const dbPuzzle = await getPuzzle(todaysPuzzle.id);
+    if (dbPuzzle) {
+      const puzzle = puzzleFromDB(dbPuzzle, dbPuzzle.id);
+      dailyPuzzle = {
+        id: dbPuzzle.id,
+        title: puzzle.title,
+        authorName: puzzle.authorName,
+        publishTime: puzzle.publishTime,
+        grid: puzzle.grid,
+        clues: puzzle.clues,
+        size: puzzle.size,
+      };
+    }
+  }
   return {
     props: {
+      dailyPuzzle,
       announcement,
       homepageText,
       newest: newest,
@@ -104,6 +127,7 @@ const gssp: GetServerSideProps<HomePageProps> = async ({ res }) => {
 export const getServerSideProps = withTranslation(gssp);
 
 export default function HomePage({
+  dailyPuzzle,
   announcement,
   newest: newest,
 }: HomePageProps) {
@@ -111,7 +135,7 @@ export default function HomePage({
   const { user } = useContext(AuthContext);
   //just the newsest puzzle out of the newest filtered list
   // (unused while <DailyPuzzle /> shows sample data; uncomment with the old block)
-  // const todaysPuzzle = newest[0];
+
   const title = t`Daily Crossword Puzzles | Nebraska Public Media`;
   const timestampMinus6Days = Date.now() - 7 * 24 * 60 * 60 * 1000;
   let NewestLastSixDays: HomepagePuz[] = [];
@@ -176,7 +200,13 @@ export default function HomePage({
             <h2 className={styles.np_sectionTitle}>
               <Trans>Today&apos;s Puzzle</Trans>
             </h2>
-            <DailyPuzzle />
+
+            {dailyPuzzle !== null ? (
+              <DailyPuzzle puzzle={dailyPuzzle} label="Daily" />
+            ) : (
+              ''
+            )}
+
             {/* <div className="flex50">
               <CreateShareSection halfWidth={true} />
             </div> */}
@@ -184,7 +214,9 @@ export default function HomePage({
           {user && !user.isAnonymous ? (
             <>
               <hr className="margin2em0" />
-              <UnfinishedPuzzleList user={user} />
+              <div className={styles.np_panel}>
+                <UnfinishedPuzzleList user={user} />
+              </div>
             </>
           ) : (
             ''
@@ -202,32 +234,40 @@ export default function HomePage({
           </h2>
           <div className={styles.np_panel}>
             {user && !user.isAnonymous
-              ? newest.map((p, i) => (
-                  <div className={styles.np_card}>
-                    <PuzzleResultLink
-                      key={i}
-                      puzzle={p}
-                      showDate={true}
-                      constructorPage={p.constructorPage}
-                      showAuthor={true}
-                      constructorIsPatron={p.constructorIsPatron}
-                      filterTags={[]}
-                    />
-                  </div>
-                ))
-              : NewestLastSixDays.map((p, i) => (
-                  <div className={styles.np_card}>
-                    <PuzzleResultLink
-                      key={i}
-                      puzzle={p}
-                      showDate={true}
-                      constructorPage={p.constructorPage}
-                      showAuthor={true}
-                      constructorIsPatron={p.constructorIsPatron}
-                      filterTags={[]}
-                    />
-                  </div>
-                ))}
+              ? newest.map((p, i) =>
+                  i !== 0 ? (
+                    <div className={styles.np_card}>
+                      <PuzzleResultLink
+                        key={i}
+                        puzzle={p}
+                        showDate={true}
+                        constructorPage={p.constructorPage}
+                        showAuthor={true}
+                        constructorIsPatron={p.constructorIsPatron}
+                        filterTags={[]}
+                      />
+                    </div>
+                  ) : (
+                    ''
+                  )
+                )
+              : NewestLastSixDays.map((p, i) =>
+                  i !== 0 ? (
+                    <div className={styles.np_card}>
+                      <PuzzleResultLink
+                        key={i}
+                        puzzle={p}
+                        showDate={true}
+                        constructorPage={p.constructorPage}
+                        showAuthor={true}
+                        constructorIsPatron={p.constructorIsPatron}
+                        filterTags={[]}
+                      />
+                    </div>
+                  ) : (
+                    ''
+                  )
+                )}
           </div>
 
           {!user || user.isAnonymous ? (

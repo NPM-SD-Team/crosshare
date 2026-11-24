@@ -1,0 +1,75 @@
+.np_card {
+  /* padding: 18px 22px; */
+  background: var(--np-white);
+  border: 4px solid var(--np-navy);
+  border-radius: var(--np-radius-lg);
+  box-shadow: var(--np-shadow-lg);
+
+  position: relative;
+  /* display: grid; */
+  /* center the card's contents vertically when cards in a row differ in height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  grid-template-columns: 92px 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 18px;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+.np_card:hover {
+  transform: translate(-2px, -2px);
+  /* box-shadow: 7px 8px 0 var(--navy); */
+  box-shadow: 7px 8px 0 var(--np-navy);
+}
+
+/*
+ * Greyed-out cards under "Create an account or login to see more".
+ * They use PuzzleResultGhostLink, whose title <h3> sits directly in .flex1
+ * (normal cards wrap it in a link), which is how they're picked out here.
+ */
+.np_card:has(:global(.flex1) > h3) {
+  cursor: default;
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.np_card:has(:global(.flex1) > h3):hover {
+  transform: none;
+  box-shadow: var(--np-shadow-lg);
+}
+
+/* the PuzzleLink row inside a card: thumbnail left, text right */
+.np_card > div {
+  width: 100%;
+  margin-bottom: 0;
+  align-items: center;
+}
+
+/* "Recent Puzzles" heading: navy text with a short orange-to-yellow bar under it */
+.np_sectionTitle {
+  position: relative;
+  display: inline-block;
+  margin: 0 0 28px;
+  /* padding-bottom: 10px; */
+  padding-bottom: 4px;
+  font-size: 2rem;
+  /* font-weight: 700; */
+  /* font-weight: 400; */
+  font-weight: 700;
+  color: var(--np-navy);
+}
+
+.np_sectionTitle::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  bottom: 0;
+  width: 58%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--np-grad);
+}

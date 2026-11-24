@@ -165,11 +165,7 @@ export function TagEditor(props: TagEditorProps) {
         <Button
           onClick={() => {
             props
-              .save(
-                Array.from(
-                  new Set(tags.map(normalizeTag).filter((s) => s.length > 2))
-                )
-              )
+              .save(Array.from(new Set(tags.filter((s) => s.length > 2))))
               .then(() => {
                 setSavedTags(tags);
                 showSnackbar('Saved tags');

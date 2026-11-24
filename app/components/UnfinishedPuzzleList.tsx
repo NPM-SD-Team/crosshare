@@ -10,6 +10,7 @@ import { getCollection, getDocRef } from '../lib/firebaseWrapper.js';
 import { getPuzzle } from '../lib/puzzleCache.js';
 import { puzzleFromDB } from '../lib/types.js';
 import { usePaginatedQuery } from '../lib/usePagination.js';
+import styles from './UnfinishedPuzzleList.module.scss';
 
 export function UnfinishedPuzzleList({ user }: { user: User | undefined }) {
   const unfinishedQuery = useMemo(
@@ -46,18 +47,22 @@ export function UnfinishedPuzzleList({ user }: { user: User | undefined }) {
   if (unfinishedPuzzles.length) {
     return (
       <>
-        <h2>
+        <h2 className={styles.np_sectionTitle}>
           <Trans>Unfinished Solves</Trans>
         </h2>
         {unfinishedPuzzles.map((puzzle) => (
-          <PuzzleResultLink
-            key={puzzle.id}
-            puzzle={{ ...puzzle, blogPostPreview: null }}
-            showAuthor={true}
-            constructorPage={null}
-            constructorIsPatron={false}
-            filterTags={[]}
-          />
+          <>
+            <div className={styles.np_card}>
+              <PuzzleResultLink
+                key={puzzle.id}
+                puzzle={{ ...puzzle, blogPostPreview: null }}
+                showAuthor={true}
+                constructorPage={null}
+                constructorIsPatron={false}
+                filterTags={[]}
+              />
+            </div>
+          </>
         ))}
         {loadingUnfinished ? (
           <p>

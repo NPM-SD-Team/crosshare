@@ -7,6 +7,9 @@ import { markdownToHast } from '../lib/markdown/markdown.js';
 import { sizeTag } from '../lib/sizeTag.js';
 import { COVER_PIC } from '../lib/style.js';
 import { Timestamp } from '../lib/timestamp.js';
+import { format } from 'date-fns/format';
+import { useRouter } from 'next/router';
+import { Locale, es, it } from 'date-fns/locale';
 import {
   ONE_WEEK,
   dbCluesToClueTArray,
@@ -49,6 +52,7 @@ import { PublishErrorsOverlay } from './PublishErrorsOverlay.js';
 import { PublishOverlay } from './PublishOverlay.js';
 import { useSnackbar } from './Snackbar.js';
 import { TagEditor } from './TagEditor.js';
+import { TagAuthorEditor } from './TagAuthorEditor.js';
 import { TagList } from './TagList.js';
 import { ToolTipText } from './ToolTipText.js';
 import { TopBar, TopBarLink } from './TopBar.js';
@@ -183,13 +187,23 @@ function autoTag(state: BuilderState): string[] {
   if (state.contestAnswers?.length) {
     auto.push('meta');
   }
+  const { locale } = useRouter();
+  const localeMap: Record<string, Locale> = { es, it, pseudo: es };
+  const dateFnsLocale = locale ? localeMap[locale] : undefined;
+  //EEEE is a format code for weekdays, it means format the full name not just the first 3 letters
+  //these question marks mean if privateUntil is null then use todays date for the auto tag
+  const text = format(state.isPrivateUntil?.toDate() ?? Date.now(), 'EEEE', {
+    locale: dateFnsLocale,
+  });
+
+  auto.push(text);
   return auto;
 }
 
 interface ClueModeProps {
   title: string | null;
-  notes: string | null;
   blogPost: string | null;
+  notes: string | null;
   guestConstructor: string | null;
   exitClueMode: () => void;
   authorId: string;
@@ -205,6 +219,7 @@ export const ClueMode = ({ state, ...props }: ClueModeProps) => {
   const [contestAnswerInProg, setContestAnswerInProg] = useState('');
   const [addingAlternate, setAddingAlternate] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
+  const [editingAuthorTags, setEditingAuthorTags] = useState(false);
   const privateUntil = state.isPrivateUntil?.toDate();
   const autoTags = autoTag(state);
 
@@ -436,6 +451,44 @@ export const ClueMode = ({ state, ...props }: ClueModeProps) => {
               />
             </div>
           )}
+          <h3>Author Tag</h3>
+          <p>The author from Nebraska Public Media</p>
+          {editingAuthorTags ? (
+            <div className="marginBottom1-5em">
+              <TagAuthorEditor
+                userTags={state.userTags}
+                cancel={() => {
+                  setEditingAuthorTags(false);
+                }}
+                save={(newTags) => {
+                  const st: SetTagsAction = {
+                    type: 'SETTAGS',
+                    tags: newTags,
+                  };
+                  props.dispatch(st);
+                  setEditingAuthorTags(false);
+                  return Promise.resolve();
+                }}
+              />
+            </div>
+          ) : (
+            <>
+              <h4>Current author tags:</h4>
+              {/**only names with caps */}
+              <TagList
+                tags={state.userTags?.filter((item) => /[A-Z]/.test(item))}
+              />
+              <p>
+                <Button
+                  onClick={() => {
+                    setEditingAuthorTags(true);
+                  }}
+                  text="Edit Tags"
+                />
+              </p>
+            </>
+          )}
+
           {props.blogPost !== null ? (
             <>
               <h3>Blog Post:</h3>

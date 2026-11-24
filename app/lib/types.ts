@@ -221,6 +221,11 @@ export interface PuzzleResult extends PuzzleT {
   id: string;
 }
 
+export type DailyPuzzlePuzzle = Pick<
+  PuzzleResult,
+  'id' | 'title' | 'authorName' | 'publishTime' | 'grid' | 'clues' | 'size'
+>;
+
 // This is kind of a hack but it helps us to ensure we only query for constructorPages on server side
 export interface ServerPuzzleResult extends Omit<
   PuzzleResult,

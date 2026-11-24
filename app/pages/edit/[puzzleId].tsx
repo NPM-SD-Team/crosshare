@@ -30,6 +30,7 @@ import { Markdown } from '../../components/Markdown.js';
 import { Overlay } from '../../components/Overlay.js';
 import { useSnackbar } from '../../components/Snackbar.js';
 import { TagEditor } from '../../components/TagEditor.js';
+import { TagAuthorEditor } from '../../components/TagAuthorEditor.js';
 import { TagList } from '../../components/TagList.js';
 import { DefaultTopBar } from '../../components/TopBar.js';
 import { DBPuzzleT, DBPuzzleV } from '../../lib/dbtypes.js';
@@ -317,6 +318,7 @@ const PuzzleEditor = ({
   const [isPrivateUntil, setIsPrivateUntil] = useState(puzzle.isPrivateUntil);
   const [addingAlternate, setAddingAlternate] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
+  const [editingAuthorTags, setEditingAuthorTags] = useState(false);
 
   if (addingAlternate) {
     return (
@@ -478,6 +480,43 @@ const PuzzleEditor = ({
                 <Button
                   onClick={() => {
                     setEditingTags(true);
+                  }}
+                  text="Edit Tags"
+                />
+              </p>
+            </>
+          )}
+          <h3>Author Tag</h3>
+          <p>The author from Nebraska Public Media</p>
+          {editingAuthorTags ? (
+            <div className="marginBottom1-5em">
+              <TagAuthorEditor
+                //says only show tags that contain a capital letter, aka a name
+                userTags={puzzle.userTags ?? []}
+                cancel={() => {
+                  setEditingAuthorTags(false);
+                }}
+                save={async (newTags) =>
+                  updateDoc(getDocRef('c', puzzle.id), { tg_u: newTags }).then(
+                    () => {
+                      setEditingAuthorTags(false);
+                    }
+                  )
+                }
+              />
+            </div>
+          ) : (
+            <>
+              <h4>Current author tags:</h4>
+              <TagList
+                tags={
+                  puzzle.userTags?.filter((item) => /[A-Z]/.test(item)) ?? []
+                }
+              />
+              <p>
+                <Button
+                  onClick={() => {
+                    setEditingAuthorTags(true);
                   }}
                   text="Edit Tags"
                 />

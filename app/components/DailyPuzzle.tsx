@@ -1,7 +1,8 @@
 import { Trans } from '@lingui/react/macro';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import styles from './DailyPuzzle.module.scss';
+import { BLOCK, DailyPuzzlePuzzle } from '../lib/types.js';
+import { slugify } from '../lib/utils.js';
 
 /*
  * Daily puzzle feature card (display only).
@@ -38,24 +39,49 @@ export const SAMPLE_DAILY_PUZZLE: DailyPuzzleData = {
   },
 };
 
-const isBlock = (grid: string[], r: number, c: number) =>
+const isBlock = (
+  grid: string[],
+  r: number,
+  c: number,
+  rows: number,
+  cols: number
+) =>
   r < 0 ||
   c < 0 ||
-  r >= grid.length ||
-  c >= (grid[r]?.length ?? 0) ||
-  grid[r]?.[c] === '#';
+  r >= rows ||
+  c >= cols ||
+  grid[r * cols + c] === undefined ||
+  grid[r * cols + c] === BLOCK;
 
 /** Standard crossword numbering: a cell is numbered if a word starts there */
-function numberGrid(grid: string[]): (number | null)[][] {
-  let n = 0;
-  return grid.map((row, r) =>
-    [...Array(row.length).keys()].map((c) => {
-      if (isBlock(grid, r, c)) return null;
-      const startsAcross = isBlock(grid, r, c - 1) && !isBlock(grid, r, c + 1);
-      const startsDown = isBlock(grid, r - 1, c) && !isBlock(grid, r + 1, c);
-      return startsAcross || startsDown ? ++n : null;
-    })
+function numberGrid(
+  grid: string[],
+  rows: number,
+  cols: number
+): (number | null)[][] {
+  const numbers: (number | null)[][] = Array.from({ length: rows }, () =>
+    Array(cols).fill(null)
   );
+  let number = 0;
+
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      if (isBlock(grid, r, c, rows, cols)) continue;
+
+      const startsAcross =
+        isBlock(grid, r, c - 1, rows, cols) &&
+        !isBlock(grid, r, c + 1, rows, cols);
+      const startsDown =
+        isBlock(grid, r - 1, c, rows, cols) &&
+        !isBlock(grid, r + 1, c, rows, cols);
+
+      if (startsAcross || startsDown) {
+        numbers[r]![c] = ++number;
+      }
+    }
+  }
+
+  return numbers;
 }
 
 const PlayIcon = () => (
@@ -76,41 +102,59 @@ const PrintIcon = () => (
   </svg>
 );
 
-export const DailyPuzzle = (props: { puzzle?: DailyPuzzleData }) => {
-  const puzzle = props.puzzle ?? SAMPLE_DAILY_PUZZLE;
+export const DailyPuzzle = ({
+  puzzle,
+  label,
+}: {
+  puzzle: DailyPuzzlePuzzle;
+  label: string;
+}) => {
   const { locale } = useRouter();
 
-  // Today's date depends on the viewer's clock, so only fill it in after
-  // mounting in the browser (avoids a server/client mismatch).
-  const [today, setToday] = useState<Date | null>(null);
-  useEffect(() => {
-    setToday(new Date());
-  }, []);
-  const date = puzzle.date ?? today;
-  const author = puzzle.author;
+  const date = puzzle.publishTime;
+  const author = puzzle.authorName;
 
-  const rows = puzzle.grid.length;
-  const cols = Math.max(...puzzle.grid.map((r) => r.length));
-  const numbers = numberGrid(puzzle.grid);
+  const rows = puzzle.size.rows !== undefined ? puzzle.size.rows : 5;
+  const cols = puzzle.size.cols !== undefined ? puzzle.size.cols : 5;
+  const numbers = numberGrid(puzzle.grid, rows, cols);
 
-  // Find the clue's entry: its start cell, then extend until a block
   const highlighted = new Set<string>();
   let activeKey = '';
-  numbers.forEach((row, r) => {
-    row.forEach((num, c) => {
-      if (num !== puzzle.clue.number) return;
-      activeKey = `${r}-${c}`;
-      const [dr, dc] = puzzle.clue.direction === 'across' ? [0, 1] : [1, 0];
-      for (
-        let rr = r, cc = c;
-        !isBlock(puzzle.grid, rr, cc);
-        rr += dr, cc += dc
-      ) {
-        highlighted.add(`${rr}-${cc}`);
-      }
-    });
-  });
+  const clue = puzzle.clues[0];
+  if (clue) {
+    for (let r = 0; r < rows && !activeKey; r += 1) {
+      for (let c = 0; c < cols; c += 1) {
+        if (numbers[r]?.[c] !== clue.num) continue;
 
+        const startsClue =
+          clue.dir === 0
+            ? isBlock(puzzle.grid, r, c - 1, rows, cols) &&
+              !isBlock(puzzle.grid, r, c + 1, rows, cols)
+            : isBlock(puzzle.grid, r - 1, c, rows, cols) &&
+              !isBlock(puzzle.grid, r + 1, c, rows, cols);
+        if (!startsClue) continue;
+
+        activeKey = `${r}-${c}`;
+        const [dr, dc] = clue.dir === 0 ? [0, 1] : [1, 0];
+        for (
+          let rr = r, cc = c;
+          !isBlock(puzzle.grid, rr, cc, rows, cols);
+          rr += dr, cc += dc
+        ) {
+          highlighted.add(`${rr}-${cc}`);
+        }
+        break;
+      }
+    }
+  }
+
+  const PrintHref = () => {
+    window.location.href = `/api/pdf/${puzzle.id}${''}`;
+  };
+  const url = `/puzzles/${puzzle.id}/${slugify(puzzle.title)}`;
+  const PlayHref = () => {
+    window.location.href = url;
+  };
   return (
     <div className={styles.card}>
       <div
@@ -118,11 +162,11 @@ export const DailyPuzzle = (props: { puzzle?: DailyPuzzleData }) => {
         style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
         aria-hidden="true"
       >
-        {puzzle.grid.flatMap((_, r) =>
-          [...Array(cols).keys()].map((c) => {
+        {Array.from({ length: rows }, (_, r) =>
+          Array.from({ length: cols }, (_, c) => {
             const key = `${r}-${c}`;
             const num = numbers[r]?.[c];
-            if (isBlock(puzzle.grid, r, c)) {
+            if (isBlock(puzzle.grid, r, c, rows, cols)) {
               return <span key={key} className={styles.block} />;
             }
             return (
@@ -142,7 +186,7 @@ export const DailyPuzzle = (props: { puzzle?: DailyPuzzleData }) => {
       <div className={styles.info}>
         <div className={styles.topRow}>
           <span className={styles.label}>
-            {puzzle.label} · {cols}×{rows}
+            {label} · {cols}×{rows}
           </span>
           <span className={styles.date}>
             {date ? new Intl.DateTimeFormat(locale ?? 'en').format(date) : ' '}
@@ -158,24 +202,23 @@ export const DailyPuzzle = (props: { puzzle?: DailyPuzzleData }) => {
 
         <div className={styles.clue}>
           <div className={styles.clueLabel}>
-            {puzzle.clue.number}{' '}
-            {puzzle.clue.direction === 'across' ? (
+            {puzzle.clues[0]?.num}{' '}
+            {puzzle.clues[0]?.dir === 0 ? (
               <Trans>Across</Trans>
             ) : (
               <Trans>Down</Trans>
             )}
           </div>
-          <div className={styles.clueText}>{puzzle.clue.text}</div>
+          <div className={styles.clueText}>{puzzle.clues[0]?.clue}</div>
         </div>
 
         <div className={styles.buttons}>
-          {/* TODO: link to today's puzzle */}
-          <button type="button" className={styles.play}>
+          <button type="button" className={styles.play} onClick={PlayHref}>
             <PlayIcon />
             <Trans>Play today&apos;s puzzle</Trans>
           </button>
-          {/* TODO: hook up printing */}
-          <button type="button" className={styles.print}>
+
+          <button type="button" className={styles.print} onClick={PrintHref}>
             <PrintIcon />
             <Trans>Print</Trans>
           </button>
